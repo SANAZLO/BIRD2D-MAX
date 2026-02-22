@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Eagle Adventure: Cinematic 2D</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #060b13; font-family: 'Segoe UI', sans-serif; touch-action: none; }
+        canvas { display: block; background: linear-gradient(to bottom, #1a2a6c, #b21f1f, #fdbb2d); }
+        
+        #ui { position: fixed; top: 20px; width: 100%; text-align: center; color: white; pointer-events: none; z-index: 10; }
+        .score { font-size: 48px; font-weight: bold; text-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        
+        #game-over {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.9);
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            z-index: 100; color: white;
+        }
+        .btn { padding: 15px 40px; background: #f1c40f; border: none; color: #000; font-size: 20px; font-weight: bold; cursor: pointer; border-radius: 5px; margin-top: 20px; }
+
+        /* Мобильный джойстик */
+        #joy-base { position: fixed; bottom: 50px; left: 50px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); display: none; }
+        #joy-knob { position: absolute; top: 30px; left: 30px; width: 40px; height: 40px; background: #fff; border-radius: 50%; }
+        @media (pointer: coarse) { #joy-base { display: block; } }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <div class="score" id="score">0</div>
+        <div id="best-ui">РЕКОРД: 0</div>
+    </div>
+
+    <div id="game-over">
+        <h1 style="font-size: 64px; margin: 0; color: #e74c3c;">КРАШ</h1>
+        <p id="final-res" style="font-size: 24px;"></p>
+        <button class="btn" onclick="reset()">ПОВТОРИТЬ</button>
+    </div>
+
+    <div id="joy-base"><div id="joy-knob"></div></div>
+    <canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const overScreen = document.getElementById('game-over');
+
+let w, h, bird, pipes, particles, score, best, isOver, frame;
+
+// Инициализация
+function init() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+    score = 0;
+    best = localStorage.getItem('eagle2dBest') || 0;
+    isOver = false;
+    frame = 0;
+    document.getElementById('best-ui').innerText = "РЕКОРД: " + best;
+
+    bird = {
+        x: w * 0.2,
+        y: h / 2,
+        v: 0,
+        radius: 20,
+        angle: 0,
+        wing: 0
+    };
+
+    pipes = [];
+    particles = [];
+}
+
+// Рисование птицы (реалистичный силуэт орла)
+function drawBird() {
+    ctx.save();
+    ctx.translate(bird.x, bird.y);
+    ctx.rotate(bird.angle);
+    
+    // Тело
+    ctx.fillStyle = '#3d2b1f';
+    ctx.beginPath();
+    ctx.ellipse(0, 0, 25, 12, 0, 0, Math.PI * 2);
+    ctx.fill();
+    
+    // Крылья (анимация взмаха)
+    ctx.fillStyle = '#5c4033';
+    let wingPos = Math.sin(bird.wing) * 25;
+    ctx.beginPath();
+    ctx.moveTo(-10, 0);
+    ctx.quadraticCurveTo(0, -wingPos - 20, 15, 0);
+    ctx.fill();
+
+    // Голова и клюв
+    ctx.fillStyle = '#fff';
+    ctx.beginPath();
+    ctx.arc(18, -5, 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = '#f1c40f';
+    ctx.beginPath();
+    ctx.moveTo(25, -5); ctx.lineTo(35, -2); ctx.lineTo(25, 2);
+    ctx.fill();
+
+    ctx.restore();
+}
+
+// Рисование препятствий (скалы)
+function drawPipes() {
+    pipes.forEach(p => {
+        let grad = ctx.createLinearGradient(p.x, 0, p.x + p.w, 0);
+        grad.addColorStop(0, '#2c3e50');
+        grad.addColorStop(1, '#000000');
+        ctx.fillStyle = grad;
+
+        // Верхняя скала
+        ctx.fillRect(p.x, 0, p.w, p.top);
+        // Нижняя скала
+        ctx.fillRect(p.x, h - p.bot, p.w, p.bot);
+        
+        // Светящиеся края
+        ctx.strokeStyle = 'rgba(52, 152, 219, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(p.x, 0, p.w, p.top);
+        ctx.strokeRect(p.x, h - p.bot, p.w, p.bot);
+    });
+}
+
+// Эффекты перьев
+function createFeather() {
+    for(let i=0; i<3; i++) {
+        particles.push({
+            x: bird.x, y: bird.y,
+            vx: -2 - Math.random() * 3,
+            vy: (Math.random() - 0.5) * 5,
+            life: 1,
+            size: 2 + Math.random() * 4
+        });
+    }
+}
+
+function update() {
+    if(isOver) return;
+
+    bird.v += 0.6; // Гравитация
+    bird.y += bird.v;
+    bird.angle = Math.min(Math.PI/4, Math.max(-Math.PI/4, bird.v * 0.05));
+    bird.wing += 0.3;
+
+    // Генерация труб
+    if(frame % 100 === 0) {
+        let gap = 220; // Просвет
+        let top = Math.random() * (h - gap - 200) + 100;
+        pipes.push({ x: w, w: 80, top: top, bot: h - top - gap, passed: false });
+    }
+
+    pipes.forEach((p, i) => {
+        p.x -= 4.5; // Скорость мира
+
+        // Проверка столкновения
+        if (bird.x + 20 > p.x && bird.x - 20 < p.x + p.w) {
+            if (bird.y - 12 < p.top || bird.y + 12 > h - p.bot) {
+                gameOver();
+            }
+        }
+
+        if(!p.passed && p.x < bird.x) {
+            score++;
+            p.passed = true;
+            scoreEl.innerText = score;
+        }
+
+        if(p.x < -p.w) pipes.splice(i, 1);
+    });
+
+    if(bird.y > h || bird.y < 0) gameOver();
+
+    // Частицы
+    particles.forEach((p, i) => {
+        p.x += p.vx; p.y += p.vy;
+        p.life -= 0.02;
+        if(p.life <= 0) particles.splice(i, 1);
+    });
+
+    frame++;
+}
+
+function draw() {
+    ctx.clearRect(0, 0, w, h);
+    
+    // Фон (параллакс гор)
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    for(let i=0; i<3; i++) {
+        let offset = (frame * (i+1) * 0.5) % w;
+        ctx.fillRect(w - offset, h - 100 - i*50, 200, 300);
+    }
+
+    drawPipes();
+    drawBird();
+
+    // Отрисовка перьев
+    particles.forEach(p => {
+        ctx.fillStyle = `rgba(200, 200, 200, ${p.life})`;
+        ctx.fillRect(p.x, p.y, p.size, p.size/2);
+    });
+}
+
+function gameOver() {
+    isOver = true;
+    if(score > best) localStorage.setItem('eagle2dBest', score);
+    document.getElementById('final-res').innerText = `Счет: ${score} | Рекорд: ${localStorage.getItem('eagle2dBest')}`;
+    overScreen.style.display = 'flex';
+}
+
+function reset() {
+    overScreen.style.display = 'none';
+    init();
+}
+
+// Управление
+function flap() {
+    if(isOver) return;
+    bird.v = -10;
+    createFeather();
+}
+
+window.addEventListener('keydown', e => { if(e.code === 'Space') flap(); });
+canvas.addEventListener('touchstart', e => { 
+    if(!joy.active) flap(); 
+    e.preventDefault();
+}, {passive: false});
+
+// Джойстик (простой клик вверх)
+let joy = { active: false };
+const base = document.getElementById('joy-base');
+base.addEventListener('touchstart', () => { joy.active = true; flap(); });
+base.addEventListener('touchend', () => { joy.active = false; });
+
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
+}
+
+window.addEventListener('resize', init);
+init();
+loop();
+
+</script>
+</body>
+</html>
