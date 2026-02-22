@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eagle Smooth Flight</title>
+    <title>Eagle Journey: Smooth 2D</title>
     <style>
         body { margin: 0; overflow: hidden; background: #0b1522; font-family: 'Segoe UI', sans-serif; touch-action: none; }
         canvas { display: block; }
         
         #ui { position: fixed; top: 20px; width: 100%; text-align: center; color: white; pointer-events: none; z-index: 10; }
-        .score { font-size: 50px; font-weight: bold; text-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: serif; }
+        .score { font-size: 50px; font-weight: bold; text-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         #timer { font-size: 80px; color: #f1c40f; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); text-shadow: 0 0 20px rgba(0,0,0,0.5); z-index: 50; }
 
         #game-over {
@@ -33,12 +33,12 @@
     <div id="timer"></div>
 
     <div id="game-over">
-        <h1 style="font-size: 40px; letter-spacing: 5px; margin-bottom: 0;">ФАТАЛЬНОЕ СТОЛКНОВЕНИЕ</h1>
-        <div class="leaderboard" id="leaderboard">
-            <h3 style="margin-top: 0; color: #f1c40f;">ЛУЧШИЕ ПОЛЕТЫ:</h3>
+        <h1 style="font-size: 40px; letter-spacing: 5px; margin-bottom: 0;">СТОЛКНОВЕНИЕ</h1>
+        <div class="leaderboard">
+            <h3 style="margin-top: 0; color: #f1c40f;">ТОП ПОЛЕТОВ:</h3>
             <div id="lb-list"></div>
         </div>
-        <button class="btn" onclick="reset()">ПОПЫТАТЬСЯ СНОВА</button>
+        <button class="btn" onclick="reset()">ЛЕТЕТЬ СНОВА</button>
     </div>
 
     <canvas id="game"></canvas>
@@ -51,10 +51,10 @@ const overScreen = document.getElementById('game-over');
 
 let w, h, bird, pipes, clouds, score, isOver, frame, gameStarted;
 
-// Настройки плавности
-const GRAVITY = 0.18; // Было 0.45 (уменьшено для плавности)
-const FLAP_STRENGTH = -5.0; // Было -8.5 (сделано мягче)
-const PIPE_SPEED = 3.2; // Было 3.8 (медленнее мир)
+// Глобальные настройки для ПЛАВНОСТИ
+const GRAVITY = 0.18; 
+const FLAP_STRENGTH = -5.2; 
+const PIPE_SPEED = 3.0; 
 
 function init() {
     w = canvas.width = window.innerWidth;
@@ -76,7 +76,6 @@ function init() {
         targetAngle: 0
     };
 
-    // Генерация начальных облаков
     for(let i=0; i<5; i++) clouds.push({x: Math.random()*w, y: Math.random()*h*0.5, s: 0.2 + Math.random()});
 
     updateLeaderboardUI();
@@ -101,18 +100,17 @@ function countdown() {
 function drawBird() {
     ctx.save();
     ctx.translate(bird.x, bird.y);
-    // Плавный поворот угла
     bird.targetAngle = Math.min(Math.PI/4, Math.max(-Math.PI/4, bird.v * 0.08));
     bird.angle += (bird.targetAngle - bird.angle) * 0.1; 
     ctx.rotate(bird.angle);
     
-    // Крылья (анимация)
+    // Крылья
     ctx.fillStyle = '#4e342e';
     let s = Math.sin(bird.wing) * 22;
     ctx.beginPath();
     ctx.moveTo(-15, 0); ctx.quadraticCurveTo(0, -s - 25, 15, 0); ctx.fill();
 
-    // Тело орла
+    // Тело
     ctx.fillStyle = '#3e2723';
     ctx.beginPath(); ctx.ellipse(0, 0, 26, 11, 0, 0, Math.PI*2); ctx.fill();
     
@@ -128,12 +126,10 @@ function drawBird() {
 }
 
 function drawWorld() {
-    // Небо
     let sky = ctx.createLinearGradient(0, 0, 0, h);
     sky.addColorStop(0, '#1565c0'); sky.addColorStop(1, '#64b5f6');
     ctx.fillStyle = sky; ctx.fillRect(0, 0, w, h);
 
-    // Облака (параллакс)
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
     clouds.forEach(c => {
         c.x -= PIPE_SPEED * 0.3 * c.s;
@@ -141,7 +137,6 @@ function drawWorld() {
         ctx.beginPath(); ctx.arc(c.x, c.y, 30*c.s, 0, Math.PI*2); ctx.fill();
     });
 
-    // Препятствия
     pipes.forEach(p => {
         let g = ctx.createLinearGradient(p.x, 0, p.x + p.w, 0);
         g.addColorStop(0, p.type === 'top' ? '#455a64' : '#2e7d32');
@@ -149,12 +144,9 @@ function drawWorld() {
         ctx.fillStyle = g;
         
         if(p.type === 'top') {
-            // Сталактит/Облако сверху
             ctx.fillRect(p.x, 0, p.w, p.h);
         } else {
-            // Скала/Лес снизу
             ctx.fillRect(p.x, h - p.h, p.w, p.h);
-            // Елки
             ctx.fillStyle = '#1b5e20';
             for(let i=0; i<3; i++) {
                 ctx.beginPath();
@@ -166,7 +158,7 @@ function drawWorld() {
 
 function update() {
     if(!gameStarted || isOver) {
-        bird.y += Math.sin(frame*0.05) * 0.5; // Плавное парение в ожидании
+        bird.y += Math.sin(frame*0.05) * 0.5; 
         frame++; return;
     }
 
@@ -174,9 +166,8 @@ function update() {
     bird.y += bird.v;
     bird.wing += 0.15;
 
-    // Спавн препятствий
-    if(frame % 130 === 0) {
-        let gap = 260; // Большой просвет для легкости
+    if(frame % 140 === 0) {
+        let gap = 280; 
         let topH = 100 + Math.random() * (h - gap - 200);
         pipes.push({x: w, w: 90, h: topH, type: 'top', passed: false});
         pipes.push({x: w, w: 90, h: h - topH - gap, type: 'bot'});
@@ -184,13 +175,10 @@ function update() {
 
     pipes.forEach((p, i) => {
         p.x -= PIPE_SPEED;
-
-        // Коллизии
         if(bird.x + 15 > p.x && bird.x - 15 < p.x + p.w) {
             if(p.type === 'top' && bird.y - 10 < p.h) die();
             if(p.type === 'bot' && bird.y + 10 > h - p.h) die();
         }
-
         if(!p.passed && p.type === 'top' && p.x < bird.x) {
             score++; p.passed = true;
             document.getElementById('score').innerText = score;
@@ -204,17 +192,17 @@ function update() {
 
 function die() {
     isOver = true;
-    let hist = JSON.parse(localStorage.getItem('bird_scores') || "[]");
+    let hist = JSON.parse(localStorage.getItem('bird_scores_max') || "[]");
     hist.push(score); hist.sort((a,b)=>b-a);
-    localStorage.setItem('bird_scores', JSON.stringify(hist.slice(0,5)));
+    localStorage.setItem('bird_scores_max', JSON.stringify(hist.slice(0,5)));
     updateLeaderboardUI();
     overScreen.style.display = 'flex';
 }
 
 function updateLeaderboardUI() {
-    let hist = JSON.parse(localStorage.getItem('bird_scores') || "[]");
+    let hist = JSON.parse(localStorage.getItem('bird_scores_max') || "[]");
     document.getElementById('lb-list').innerHTML = hist.map((s,i) => `
-        <div class="lb-item"><span>#${i+1} место</span> <b>${s} м.</b></div>
+        <div class="lb-item"><span>#${i+1} результат</span> <b>${s} очков</b></div>
     `).join('');
     document.getElementById('best-ui').innerText = "РЕКОРД: " + (hist[0] || 0);
 }
