@@ -564,7 +564,11 @@ function onTap(e){
   }
 }
 
+let _lastFlapTime = 0;
 function doFlap(){
+  const now = Date.now();
+  if(now - _lastFlapTime < 80) return; // защита от двойного тапа touch+mouse
+  _lastFlapTime = now;
   const bdef = BIRDS[birdIdx];
   bird.v = JUMP * getBirdJumpM(bdef.id);
   const b = BIRDS[birdIdx];
@@ -577,7 +581,10 @@ function doFlap(){
 
 // Слушаем ТОЛЬКО canvas — никаких других элементов поверх него во время игры
 CV.addEventListener('touchstart', onTap, {passive:false});
-CV.addEventListener('mousedown',  onTap);
+// mousedown только если нет touch-поддержки (ПК)
+if(!('ontouchstart' in window)){
+  CV.addEventListener('mousedown', onTap);
+}
 window.addEventListener('keydown', e=>{
   if(e.code==='Space'||e.code==='ArrowUp'){ e.preventDefault(); onTap(null); }
 });
@@ -660,7 +667,14 @@ function updateGame(){
     const py = p.top ? 0 : H-p.h;
     // Gun — уничтожаем трубу при касании
     if(activeGun>0 && bird.x+br > p.x && bird.x-br < p.x+p.w){
-      // Взрыв трубы
+      // Взрыв трубы — засчитываем очко если верхняя и ещё не пройдена
+      if(p.top && !p.passed){
+        p.passed=true; score++;
+        combo++; comboTimer=110;
+        updateBiome();
+        document.getElementById('hud-score').textContent = score;
+        updateComboUI(); spawnPts(); checkQuestsMidGame();
+      }
       for(let ei=0;ei<8;ei++) particles.push({
         x:p.x+p.w/2, y:py+p.h/2,
         vx:(Math.random()-.5)*8, vy:(Math.random()-.5)*8,
@@ -686,8 +700,10 @@ function updateGame(){
         // Взрываем только эту трубу и её пару (top+bottom)
         const hitX = p.x;
         pipes.forEach(pp=>{ if(Math.abs(pp.x - hitX) < 5) pp._destroy=true; });
+        // Засчитываем очко за уничтоженную пару
+        if(!p.passed){ score++; combo++; comboTimer=110; updateBiome(); document.getElementById('hud-score').textContent=score; updateComboUI(); spawnPts(); checkQuestsMidGame(); }
         for(let pi=pipes.length-1;pi>=0;pi--){
-          if(pipes[pi]._destroy){
+          if(pipes[pi]._destroy){ pipes[pi].passed=true;
             const pp=pipes[pi];
             for(let ei=0;ei<12;ei++) particles.push({
               x:pp.x+pp.w/2, y:pp.top?pp.h/2:H-pp.h/2,
