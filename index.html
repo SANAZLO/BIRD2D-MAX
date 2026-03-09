@@ -12,7 +12,11 @@ body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;fo
 canvas{display:block;position:fixed;top:0;left:0}
 
 /* ── ПОВЕРНУТЬ ЭКРАН ── */
-#rotate{display:none!important;}
+#rotate{display:none;position:fixed;inset:0;z-index:9999;background:#05080f;
+  flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
+#rotate-icon{font-size:72px;animation:rtilt 1.5s ease-in-out infinite alternate}
+@keyframes rtilt{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
+#rotate p{color:#f1c40f;font-size:20px;font-weight:700;letter-spacing:2px;padding:0 20px}
 #rotate-icon{font-size:72px;animation:rtilt 1.5s ease-in-out infinite alternate}
 @keyframes rtilt{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
 #rotate p{color:#f1c40f;font-size:20px;font-weight:700;letter-spacing:2px;padding:0 20px}
@@ -366,8 +370,9 @@ if(window.Telegram && window.Telegram.WebApp){
 }
 
 function checkRotate(){
-  // Игра работает в обоих ориентациях — экран поворота не нужен
-  document.getElementById('rotate').style.display = 'none';
+  const mob = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  document.getElementById('rotate').style.display =
+    (mob && window.innerHeight > window.innerWidth) ? 'flex' : 'none';
 }
 
 // ══════════════════════════════════════════
@@ -376,7 +381,7 @@ function checkRotate(){
 let GRAV, JUMP, SPEED, GAP, PIPE_INT;
 function recalcPhysics(){
   const portrait = H > W;
-  const speedMult = [1.7, 2.2, 2.9, 3.8, 5.2][diffLevel-1];
+  const speedMult = [0.9, 1.2, 1.6, 2.2, 3.0][diffLevel-1];
   // Скорость одинаковая в обоих режимах — без orientMult
   SPEED    = W * 0.0055 * speedMult;
   GRAV     = H * (portrait ? 0.00028 : 0.00042);
@@ -1414,47 +1419,43 @@ function drawAnimal(a){
   }
   else if(a.type==='vulture'){
     const flap=Math.sin(t)*0.5;
-    // Тело
+    const wy=flap*14*s;
+    // Тело по центру
     const bG=CX.createRadialGradient(0,0,2*s,0,0,14*s);
     bG.addColorStop(0,'#6a4a38'); bG.addColorStop(1,'#3a2418');
-    CX.fillStyle=bG; CX.beginPath(); CX.ellipse(0,0,13*s,7*s,-0.15,0,Math.PI*2); CX.fill();
-    // Крылья — безье с перьями
-    const wy=flap*14*s;
+    CX.fillStyle=bG; CX.beginPath(); CX.ellipse(0,0,13*s,7*s,0,0,Math.PI*2); CX.fill();
+    // Крылья симметричные
     CX.fillStyle='#2e1c0e';
-    // Левое
-    CX.beginPath(); CX.moveTo(-2*s,-3*s); CX.bezierCurveTo(-12*s,wy-8*s,-26*s,wy-2*s,-32*s,wy);
-    CX.bezierCurveTo(-26*s,wy+10*s,-12*s,wy+4*s,-2*s,4*s); CX.closePath(); CX.fill();
-    // Правое
-    CX.beginPath(); CX.moveTo(2*s,-3*s); CX.bezierCurveTo(12*s,wy-8*s,26*s,wy-2*s,32*s,wy);
-    CX.bezierCurveTo(26*s,wy+10*s,12*s,wy+4*s,2*s,4*s); CX.closePath(); CX.fill();
-    // Первостепенные перья
+    CX.beginPath(); CX.moveTo(-2*s,-3*s); CX.bezierCurveTo(-12*s,wy-8*s,-28*s,wy-2*s,-34*s,wy);
+    CX.bezierCurveTo(-28*s,wy+10*s,-12*s,wy+4*s,-2*s,4*s); CX.closePath(); CX.fill();
+    CX.beginPath(); CX.moveTo(2*s,-3*s); CX.bezierCurveTo(12*s,wy-8*s,28*s,wy-2*s,34*s,wy);
+    CX.bezierCurveTo(28*s,wy+10*s,12*s,wy+4*s,2*s,4*s); CX.closePath(); CX.fill();
+    // Перья на концах крыльев
     CX.fillStyle='#1a0e08';
-    [-32,-28,-24].forEach((wx,i)=>{
-      CX.beginPath(); CX.moveTo(wx*s,wy); CX.lineTo((wx-4)*s,wy+8*s); CX.lineTo((wx+2)*s,wy+6*s); CX.closePath(); CX.fill();
-      CX.beginPath(); CX.moveTo(-wx*s,wy); CX.lineTo((-wx+4)*s,wy+8*s); CX.lineTo((-wx-2)*s,wy+6*s); CX.closePath(); CX.fill();
+    [-34,-29,-24].forEach(wx=>{
+      CX.beginPath(); CX.moveTo(wx*s,wy); CX.lineTo((wx-4)*s,wy+9*s); CX.lineTo((wx+3)*s,wy+7*s); CX.closePath(); CX.fill();
     });
-    // Шея — голая красная
-    CX.fillStyle='#c05040';
-    CX.beginPath(); CX.moveTo(-4*s,-6*s); CX.lineTo(4*s,-6*s); CX.lineTo(6*s,-14*s); CX.lineTo(-6*s,-14*s); CX.closePath(); CX.fill();
-    // Сморщенная кожа шеи
-    CX.strokeStyle='#903020'; CX.lineWidth=1*s;
-    [-1,0,1].forEach(dx=>{CX.beginPath();CX.moveTo(dx*2*s,-7*s);CX.lineTo(dx*2.5*s,-13*s);CX.stroke();});
-    // Голова
-    const headG=CX.createRadialGradient(8*s,-17*s,1*s,8*s,-17*s,7*s);
-    headG.addColorStop(0,'#e07060'); headG.addColorStop(1,'#a04030');
-    CX.fillStyle=headG; CX.beginPath(); CX.ellipse(8*s,-17*s,7*s,6*s,0.3,0,Math.PI*2); CX.fill();
-    // Клюв крючком
-    CX.fillStyle='#d4b840';
-    CX.beginPath(); CX.moveTo(13*s,-16*s); CX.lineTo(20*s,-14*s); CX.bezierCurveTo(22*s,-14*s,22*s,-12*s,18*s,-13*s); CX.lineTo(13*s,-14*s); CX.closePath(); CX.fill();
-    // Глаз
-    CX.fillStyle='#e8d000'; CX.beginPath(); CX.arc(12*s,-18*s,2.5*s,0,Math.PI*2); CX.fill();
-    CX.fillStyle='#0a0800'; CX.beginPath(); CX.arc(12*s,-18*s,1.5*s,0,Math.PI*2); CX.fill();
-    CX.fillStyle='rgba(255,255,200,0.5)'; CX.beginPath(); CX.arc(12.8*s,-18.8*s,0.6*s,0,Math.PI*2); CX.fill();
-    // Хвостовые перья
+    // Хвостовые перья СПРАВА (+X, т.к. после scale(-1) станут влево)
     CX.fillStyle='#3a2418';
     for(let fi=-2;fi<=2;fi++){
-      CX.beginPath(); CX.moveTo(fi*2*s,7*s); CX.lineTo((fi-0.5)*2.5*s,16*s); CX.lineTo((fi+0.5)*2.5*s,16*s); CX.closePath(); CX.fill();
+      CX.beginPath(); CX.moveTo((12+fi*2)*s,7*s); CX.lineTo((11+fi*2)*s,16*s); CX.lineTo((13+fi*2)*s,16*s); CX.closePath(); CX.fill();
     }
+    // Шея — СЛЕВА от центра (-X → после scale станет справа = перед телом)
+    CX.fillStyle='#c05040';
+    CX.beginPath(); CX.moveTo(-6*s,-5*s); CX.lineTo(0*s,-5*s); CX.lineTo(-2*s,-14*s); CX.lineTo(-10*s,-14*s); CX.closePath(); CX.fill();
+    CX.strokeStyle='#903020'; CX.lineWidth=1*s;
+    [-8,-6,-4].forEach(dx=>{CX.beginPath();CX.moveTo(dx*s,-6*s);CX.lineTo((dx-1)*s,-13*s);CX.stroke();});
+    // Голова СЛЕВА (-X → после scale станет справа)
+    const headG=CX.createRadialGradient(-10*s,-18*s,1*s,-10*s,-18*s,7*s);
+    headG.addColorStop(0,'#e07060'); headG.addColorStop(1,'#a04030');
+    CX.fillStyle=headG; CX.beginPath(); CX.ellipse(-10*s,-18*s,7*s,6*s,0,0,Math.PI*2); CX.fill();
+    // Клюв (ещё левее)
+    CX.fillStyle='#d4b840';
+    CX.beginPath(); CX.moveTo(-15*s,-17*s); CX.lineTo(-22*s,-15*s); CX.bezierCurveTo(-24*s,-15*s,-24*s,-13*s,-20*s,-14*s); CX.lineTo(-15*s,-15*s); CX.closePath(); CX.fill();
+    // Глаз
+    CX.fillStyle='#e8d000'; CX.beginPath(); CX.arc(-13*s,-19*s,2.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='#0a0800'; CX.beginPath(); CX.arc(-13*s,-19*s,1.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,200,0.5)'; CX.beginPath(); CX.arc(-12*s,-20*s,0.6*s,0,Math.PI*2); CX.fill();
   }
   else if(a.type==='scorpion'){
     // Тень
