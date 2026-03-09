@@ -12,7 +12,7 @@ body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;fo
 canvas{display:block;position:fixed;top:0;left:0}
 
 /* ── ПОВЕРНУТЬ ЭКРАН ── */
-#rotate{display:none!important;position:fixed;inset:0;z-index:9999;background:#05080f;
+#rotate{display:none!important;position:fixed;inset:0;background:#05080f;
   flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
 #rotate-icon{font-size:72px;animation:rtilt 1.5s ease-in-out infinite alternate}
 @keyframes rtilt{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
@@ -182,10 +182,7 @@ canvas{display:block;position:fixed;top:0;left:0}
 </head>
 <body>
 
-<div id="rotate">
-  <div id="rotate-icon">📱</div>
-  <p>ПОВЕРНИ ТЕЛЕФОН<br>ГОРИЗОНТАЛЬНО</p>
-</div>
+<!-- rotate screen removed - portrait supported -->
 
 <!-- ГЛАВНЫЙ CANVAS — единственная интерактивная поверхность во время игры -->
 <canvas id="c"></canvas>
@@ -370,8 +367,7 @@ if(window.Telegram && window.Telegram.WebApp){
 }
 
 function checkRotate(){
-  // Игра работает в portrait и landscape — экран поворота не нужен
-  document.getElementById('rotate').style.display = 'none';
+  // portrait и landscape оба поддерживаются
 }
 
 // ══════════════════════════════════════════
@@ -726,7 +722,7 @@ function updateGame(){
         unlockFlashBird = unl; // unl = индекс только что открытой птицы (0-based)
       }
       // Бонус навыка птицы: каждые 10 труб
-      if(score > 0 && score % 10 === 0){
+      if(score > 0 && score % 30 === 0){
         const sk = BIRDS[birdIdx];
         if(sk.gunB)    activeGun    = Math.min(600, activeGun    + sk.gunB);
         if(sk.shieldB) activeShield = Math.min(600, activeShield + sk.shieldB);
@@ -2719,8 +2715,13 @@ function updateCoins(){
     co.pulse += 0.1;
     const dx=bird.x-co.x, dy=bird.y-co.y;
     const dist=Math.sqrt(dx*dx+dy*dy);
-    const magnet=getBirdCoinRadius(BIRDS[birdIdx].id);
-    if(magnet>0 && dist < magnet){ co.x+=dx*0.12; co.y+=dy*0.12; }
+    const magnetBase=getBirdCoinRadius(BIRDS[birdIdx].id);
+    const magnet = magnetBase * Math.min(W,H)/400; // масштаб к экрану
+    if(magnet>0 && dist < magnet){
+      const pull = Math.min(1, 0.18 + (1 - dist/magnet)*0.25); // сильнее ближе
+      co.x += dx * pull;
+      co.y += dy * pull;
+    }
     if(dist < co.r + br){
       sessionCoins++;
       addCoins(1);
