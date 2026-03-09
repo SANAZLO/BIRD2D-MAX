@@ -2,24 +2,25 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Буря Орлов</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;font-family:'Segoe UI',Arial,sans-serif}
+html{width:100%;height:100%;background:#000}
+body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;font-family:'Segoe UI',Arial,sans-serif}
 canvas{display:block;position:fixed;top:0;left:0}
 
 /* ── ПОВЕРНУТЬ ЭКРАН ── */
-#rotate{display:none;position:fixed;inset:0;z-index:9999;background:#05080f;
-  flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
+#rotate{display:none!important;}
 #rotate-icon{font-size:72px;animation:rtilt 1.5s ease-in-out infinite alternate}
 @keyframes rtilt{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
 #rotate p{color:#f1c40f;font-size:20px;font-weight:700;letter-spacing:2px;padding:0 20px}
 
 /* ── МЕНЮ ВЫБОРА ПТИЦЫ — поверх всего ── */
 #menu{position:fixed;inset:0;z-index:500;background:rgba(3,6,18,.95);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:16px}
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;
+  padding:16px;overflow-y:auto}
 
 .sel-title{font-size:clamp(28px,6vw,48px);font-weight:900;letter-spacing:3px;
   background:linear-gradient(135deg,#f1c40f,#e67e22);
@@ -346,18 +347,27 @@ function rrect(ctx,x,y,w,h,r){
 let W=0, H=0;
 
 function resize(){
+  // innerWidth/Height — самый надёжный источник для canvas размера
   W = CV.width  = window.innerWidth;
   H = CV.height = window.innerHeight;
+  // Canvas атрибуты = CSS размер — никакого масштабирования/мыла
+  CV.style.width  = W + 'px';
+  CV.style.height = H + 'px';
   recalcPhysics();
-  checkRotate();
 }
 window.addEventListener('resize', resize);
-window.addEventListener('orientationchange', ()=>setTimeout(resize,250));
+window.addEventListener('orientationchange', ()=>setTimeout(resize,300));
+if(window.visualViewport) window.visualViewport.addEventListener('resize', resize);
+if(window.visualViewport) window.visualViewport.addEventListener('scroll', resize);
+// Telegram WebApp API — слушаем изменение viewport
+if(window.Telegram && window.Telegram.WebApp){
+  window.Telegram.WebApp.expand();
+  window.Telegram.WebApp.onEvent('viewportChanged', ()=>setTimeout(resize,100));
+}
 
 function checkRotate(){
-  const mob = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  document.getElementById('rotate').style.display =
-    (mob && window.innerHeight > window.innerWidth) ? 'flex' : 'none';
+  // Игра работает в обоих ориентациях — экран поворота не нужен
+  document.getElementById('rotate').style.display = 'none';
 }
 
 // ══════════════════════════════════════════
@@ -365,13 +375,17 @@ function checkRotate(){
 // ══════════════════════════════════════════
 let GRAV, JUMP, SPEED, GAP, PIPE_INT;
 function recalcPhysics(){
-  // Скорость масштабируется по ширине экрана + уровню сложности
-  const speedMult = [0.55, 0.75, 1.0, 1.35, 1.8][diffLevel-1];
-  SPEED    = W * 0.0055 * speedMult;
-  GRAV     = H * 0.00042;
-  JUMP     = H * -0.011;
-  GAP      = H * (0.44 - (diffLevel-1)*0.03); // на высоком уровне зазор меньше
-  PIPE_INT = Math.round(380 - (diffLevel-1)*30); // на высоком уровне трубы чаще
+  const portrait = H > W;
+  const speedMult = [1.7, 2.2, 2.9, 3.8, 5.2][diffLevel-1];
+  // В портретном режиме трубы относительно уже, скорость чуть меньше
+  const orientMult = portrait ? 0.75 : 1.0;
+  SPEED    = W * 0.0055 * speedMult * orientMult;
+  GRAV     = H * (portrait ? 0.00032 : 0.00042);
+  JUMP     = H * (portrait ? -0.009  : -0.011);
+  // Зазор: в portrait H большой, поэтому берём % от min(W,H)
+  const ref = Math.min(W, H);
+  GAP      = ref * (portrait ? 0.55 : 0.44) * (1 - (diffLevel-1)*0.03);
+  PIPE_INT = Math.round(380 - (diffLevel-1)*30);
 }
 
 // ══════════════════════════════════════════
@@ -2975,11 +2989,20 @@ function loop(ts){
 // ══════════════════════════════════════════
 // ЗАПУСК
 // ══════════════════════════════════════════
-resize();
-buildSelector();
-initWorld();
-setDiff(2); // начальный уровень — средний
-loop(); // ← запускаем цикл сразу
+// Telegram Mini App — разворачиваем на весь экран
+try{
+  if(window.Telegram && window.Telegram.WebApp){
+    Telegram.WebApp.expand();
+    Telegram.WebApp.disableVerticalSwipes && Telegram.WebApp.disableVerticalSwipes();
+  }
+}catch(e){}
+setTimeout(()=>{
+  resize();
+  buildSelector();
+  initWorld();
+  setDiff(2);
+  loop();
+}, 100); // небольшая задержка чтобы Telegram успел отдать правильный viewport
 </script>
 </body>
 </html>
