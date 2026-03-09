@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eagle Storm: Day & Night Edition</title>
-    <style>
-        :root { --gold: #f1c40f; --bg: #020617; }<!DOCTYPE html>
-<html lang="ru">
-<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -38,8 +31,9 @@ canvas{display:block;position:fixed;top:0;left:0}
   width:100%;max-width:680px;margin-bottom:16px}
 .sel-card{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);
   border-radius:14px;padding:10px 6px 8px;cursor:pointer;transition:.2s;text-align:center}
-.sel-card:hover{border-color:rgba(241,196,15,.7);transform:translateY(-3px)}
+.sel-card:hover:not(.locked){border-color:rgba(241,196,15,.7);transform:translateY(-3px)}
 .sel-card.active{border-color:#f1c40f;background:rgba(241,196,15,.1)}
+.sel-card.locked{border-color:rgba(255,255,255,.05);opacity:.7}
 .sel-card canvas{display:block;margin:0 auto 6px;width:54px;height:54px}
 .sel-card .cname{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.7)}
 .sel-card.active .cname{color:#f1c40f}
@@ -54,6 +48,16 @@ canvas{display:block;position:fixed;top:0;left:0}
 .sel-name-row input::placeholder{color:rgba(255,255,255,.3)}
 
 .sel-btns{display:flex;gap:12px;width:100%;max-width:500px}
+.diff-row{display:flex;gap:6px;width:100%;max-width:500px;margin-bottom:12px;align-items:center}
+.diff-label{font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.4);white-space:nowrap;margin-right:4px}
+.diff-btn{flex:1;padding:8px 4px;border:2px solid rgba(255,255,255,.12);border-radius:10px;
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);font-size:11px;font-weight:800;
+  letter-spacing:1px;cursor:pointer;transition:all .2s;text-align:center;line-height:1.3}
+.diff-btn:hover{border-color:rgba(241,196,15,.5);color:#f1c40f;transform:translateY(-2px)}
+.diff-btn.active{border-color:#f1c40f;background:rgba(241,196,15,.12);color:#f1c40f;
+  box-shadow:0 0 12px rgba(241,196,15,.3)}
+.diff-btn.diff-5.active{border-color:#e74c3c;background:rgba(231,76,60,.12);color:#e74c3c;
+  box-shadow:0 0 12px rgba(231,76,60,.4)}
 .btn-play{flex:2;padding:15px;border:none;border-radius:12px;
   background:linear-gradient(135deg,#f1c40f,#e67e22);
   color:#000;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:.2s}
@@ -97,6 +101,52 @@ canvas{display:block;position:fixed;top:0;left:0}
   letter-spacing:1px;cursor:pointer;transition:.2s}
 .btn-back:hover{background:rgba(255,255,255,.15)}
 .btn-back:active{transform:scale(.96)}
+
+/* ── ЭКРАН ПРОКАЧКИ ── */
+#upgrade-screen{position:fixed;inset:0;z-index:600;display:none;
+  background:rgba(3,6,18,.97);flex-direction:column;align-items:center;
+  justify-content:flex-start;padding:16px;overflow-y:auto}
+.upg-header{display:flex;align-items:center;gap:12px;width:100%;max-width:600px;
+  margin-bottom:14px}
+.upg-back{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);
+  border-radius:10px;padding:8px 16px;color:#fff;font-size:14px;font-weight:700;
+  cursor:pointer;transition:.2s;white-space:nowrap}
+.upg-back:hover{background:rgba(255,255,255,.2)}
+.upg-title{font-size:clamp(18px,4vw,28px);font-weight:900;letter-spacing:2px;
+  background:linear-gradient(135deg,#f1c40f,#e67e22);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;flex:1;text-align:center}
+.upg-coins{font-size:16px;font-weight:900;color:#f1c40f;white-space:nowrap}
+.upg-bird-preview{display:flex;align-items:center;gap:16px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:16px;padding:14px 20px;width:100%;max-width:600px;margin-bottom:14px}
+.upg-bird-canvas{flex-shrink:0}
+.upg-bird-info{flex:1}
+.upg-bird-name{font-size:20px;font-weight:900;color:#fff;margin-bottom:4px}
+.upg-bird-skill{font-size:12px;color:rgba(255,255,255,.5);line-height:1.4}
+.upg-skills{display:flex;flex-direction:column;gap:10px;width:100%;max-width:600px}
+.upg-skill{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.1);
+  border-radius:14px;padding:12px 16px;cursor:pointer;transition:all .2s;position:relative;
+  overflow:hidden}
+.upg-skill:hover{border-color:rgba(241,196,15,.5);transform:translateX(3px)}
+.upg-skill.maxed{border-color:rgba(46,204,113,.4);cursor:default}
+.upg-skill-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.upg-skill-icon{font-size:22px}
+.upg-skill-name{font-size:14px;font-weight:800;color:#fff;flex:1}
+.upg-skill-cost{font-size:13px;font-weight:700;color:#f1c40f}
+.upg-skill-cost.maxed{color:#2ecc71}
+.upg-skill-desc{font-size:11px;color:rgba(255,255,255,.45);margin-bottom:8px;line-height:1.4}
+.upg-skill-bar{height:8px;background:rgba(255,255,255,.1);border-radius:4px;overflow:hidden}
+.upg-skill-bar-fill{height:100%;border-radius:4px;transition:width .4s ease;
+  background:linear-gradient(90deg,#f1c40f,#e67e22)}
+.upg-skill-bar-fill.maxed{background:linear-gradient(90deg,#2ecc71,#16a085)}
+.upg-skill-levels{display:flex;gap:4px;margin-top:6px}
+.upg-lvl-dot{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.2);
+  transition:all .3s}
+.upg-lvl-dot.filled{background:#f1c40f;border-color:#f1c40f;box-shadow:0 0 6px #f1c40f}
+.upg-lvl-dot.filled.maxed{background:#2ecc71;border-color:#2ecc71;box-shadow:0 0 6px #2ecc71}
+@keyframes upgFlash{0%{opacity:0;transform:scale(.8)}50%{opacity:1;transform:scale(1.05)}100%{opacity:0;transform:scale(1)}}
+.upg-flash{animation:upgFlash .5s ease-out forwards;position:absolute;inset:0;
+  background:rgba(241,196,15,.15);border-radius:14px;pointer-events:none}
 
 /* ── HUD ── */
 #hud{position:fixed;top:0;left:0;right:0;z-index:100;pointer-events:none;
@@ -144,6 +194,14 @@ canvas{display:block;position:fixed;top:0;left:0}
     <input type="text" id="inp-name" placeholder="Введи имя (необязательно)"
            maxlength="12" autocomplete="off" autocorrect="off" spellcheck="false">
   </div>
+  <div class="diff-row">
+    <span class="diff-label">СКОРОСТЬ:</span>
+    <button class="diff-btn" onclick="setDiff(1)" id="diff-1">🐢<br>ЛЁГКИЙ</button>
+    <button class="diff-btn" onclick="setDiff(2)" id="diff-2">🐦<br>СРЕДНИЙ</button>
+    <button class="diff-btn" onclick="setDiff(3)" id="diff-3">🦅<br>БЫСТРО</button>
+    <button class="diff-btn" onclick="setDiff(4)" id="diff-4">⚡<br>ЖЁСТКО</button>
+    <button class="diff-btn diff-5" onclick="setDiff(5)" id="diff-5">💀<br>НЕВОЗМОЖНО</button>
+  </div>
   <div class="sel-btns">
     <button class="btn-play" onclick="clickPlay()">▶ ИГРАТЬ</button>
     <button class="btn-anon" onclick="clickAnon()">Без имени</button>
@@ -165,6 +223,23 @@ canvas{display:block;position:fixed;top:0;left:0}
   </div>
 </div>
 
+<!-- ЭКРАН ПРОКАЧКИ -->
+<div id="upgrade-screen">
+  <div class="upg-header">
+    <button class="upg-back" onclick="closeUpgrade()">← НАЗАД</button>
+    <div class="upg-title" id="upg-title">ПРОКАЧКА</div>
+    <div class="upg-coins" id="upg-coins">💰 0</div>
+  </div>
+  <div class="upg-bird-preview">
+    <canvas class="upg-bird-canvas" id="upg-preview" width="80" height="80"></canvas>
+    <div class="upg-bird-info">
+      <div class="upg-bird-name" id="upg-bname"></div>
+      <div class="upg-bird-skill" id="upg-bskill"></div>
+    </div>
+  </div>
+  <div class="upg-skills" id="upg-skills"></div>
+</div>
+
 <!-- HUD -->
 <div id="hud">
   <div>
@@ -180,14 +255,63 @@ canvas{display:block;position:fixed;top:0;left:0}
 // ПТИЦЫ
 // ══════════════════════════════════════════
 const BIRDS=[
-  {id:'eagle',  name:'ОРЁЛ',      tag:'КЛАССИКА', emoji:'🦅',body:'#5d4037',wing:'#3e2723',head:'#fff8e1',beak:'#f59e0b',eye:'#111',  aura:null,       trail:'rgba(139,90,43,.4)'},
-  {id:'phoenix',name:'ФЕНИКС',    tag:'ОГОНЬ',    emoji:'🔥',body:'#e74c3c',wing:'#922b21',head:'#f39c12',beak:'#e67e22',eye:'#fff',  aura:'#ff6b35',  trail:'rgba(231,76,60,.5)'},
-  {id:'raven',  name:'ВОРОН',     tag:'ТЕНЬ',     emoji:'🐦',body:'#1a1a2e',wing:'#0d0d1a',head:'#2c2c54',beak:'#95a5a6',eye:'#6c5ce7',aura:'#6c5ce7', trail:'rgba(108,92,231,.4)'},
-  {id:'falcon', name:'СОКОЛ',     tag:'СКОРОСТЬ', emoji:'🦅',body:'#2c3e50',wing:'#1a252f',head:'#ecf0f1',beak:'#e67e22',eye:'#e74c3c',aura:'#3498db', trail:'rgba(52,73,94,.4)'},
-  {id:'parrot', name:'ПОПУГАЙ',   tag:'УДАЧА',    emoji:'🦜',body:'#27ae60',wing:'#1e8449',head:'#f1c40f',beak:'#e74c3c',eye:'#fff',  aura:'#f1c40f',  trail:'rgba(39,174,96,.4)'},
-  {id:'storm',  name:'БУРЕВЕСТ.', tag:'ЛЕГЕНДА',  emoji:'⚡',body:'#7f8c8d',wing:'#636e72',head:'#dfe6e9',beak:'#fdcb6e',eye:'#6c5ce7',aura:'#fdcb6e', trail:'rgba(127,140,141,.5)'},
-  {id:'ice',    name:'ЛЕДЯНОЙ',   tag:'АРКТИКА',  emoji:'❄️',body:'#74b9ff',wing:'#0984e3',head:'#dfe6e9',beak:'#b2bec3',eye:'#111',  aura:'#74b9ff',  trail:'rgba(116,185,255,.5)'},
-  {id:'golden', name:'ЗОЛОТОЙ',   tag:'РЕДКИЙ',   emoji:'✨',body:'#f1c40f',wing:'#e67e22',head:'#fffde7',beak:'#e67e22',eye:'#2d3436',aura:'#f1c40f', trail:'rgba(241,196,15,.6)'},
+  // skill: описание навыка | jumpM=прыжок | gravM=гравитация | hitM=хитбокс
+  //        gunB/shieldB/ghostB/slowB = бонус-кадры каждые 10 труб
+  {id:'eagle',  name:'ОРЁЛ',      emoji:'🦅',
+   skill:'Сбалансированный — без бонусов, честная игра',
+   skillIcon:'⚖️',
+   jumpM:1.0, gravM:1.0, hitM:1.0,
+   gunB:0,   shieldB:0,  ghostB:0,  slowB:0,
+   body:'#5d4037',wing:'#3e2723',head:'#fff8e1',beak:'#f59e0b',eye:'#111',  aura:null,      trail:'rgba(139,90,43,.4)'},
+
+  {id:'phoenix',name:'ФЕНИКС',    emoji:'🔥',
+   skill:'Пушка: каждые 10 труб +8 сек огня',
+   skillIcon:'💥',
+   jumpM:1.0, gravM:1.05, hitM:1.0,
+   gunB:480, shieldB:0,  ghostB:0,  slowB:0,
+   body:'#e74c3c',wing:'#922b21',head:'#f39c12',beak:'#e67e22',eye:'#fff',  aura:'#ff6b35', trail:'rgba(231,76,60,.5)'},
+
+  {id:'raven',  name:'ВОРОН',     emoji:'🐦',
+   skill:'Призрак: каждые 10 труб +8 сек невидимости',
+   skillIcon:'👻',
+   jumpM:1.1, gravM:0.95, hitM:0.85,
+   gunB:0,   shieldB:0,  ghostB:480,slowB:0,
+   body:'#1a1a2e',wing:'#0d0d1a',head:'#2c2c54',beak:'#95a5a6',eye:'#6c5ce7',aura:'#6c5ce7',trail:'rgba(108,92,231,.4)'},
+
+  {id:'falcon', name:'СОКОЛ',     emoji:'🦅',
+   skill:'Манёвренность x1.05 — точный контролируемый полёт',
+   skillIcon:'🎯',
+   jumpM:1.05,gravM:0.9,  hitM:0.9,
+   gunB:0,   shieldB:0,  ghostB:0,  slowB:0,
+   body:'#2c3e50',wing:'#1a252f',head:'#ecf0f1',beak:'#e67e22',eye:'#e74c3c',aura:'#3498db',trail:'rgba(52,73,94,.4)'},
+
+  {id:'parrot', name:'ПОПУГАЙ',   emoji:'🦜',
+   skill:'Замедление: каждые 10 труб +8 сек слоу',
+   skillIcon:'⏳',
+   jumpM:0.95,gravM:1.0,  hitM:1.0,
+   gunB:0,   shieldB:0,  ghostB:0,  slowB:480,
+   body:'#27ae60',wing:'#1e8449',head:'#f1c40f',beak:'#e74c3c',eye:'#fff',  aura:'#f1c40f', trail:'rgba(39,174,96,.4)'},
+
+  {id:'storm',  name:'БУРЕВЕСТНИК', emoji:'⚡',
+   skill:'Щит: каждые 10 труб +8 сек защиты',
+   skillIcon:'🛡',
+   jumpM:1.0, gravM:0.92, hitM:0.95,
+   gunB:0,   shieldB:480,ghostB:0,  slowB:0,
+   body:'#7f8c8d',wing:'#636e72',head:'#dfe6e9',beak:'#fdcb6e',eye:'#6c5ce7',aura:'#fdcb6e',trail:'rgba(127,140,141,.5)'},
+
+  {id:'ice',    name:'ЛЕДЯНОЙ',   emoji:'❄️',
+   skill:'Малый хитбокс x0.7 + замедление каждые 10 труб',
+   skillIcon:'❄️',
+   jumpM:1.05,gravM:0.88, hitM:0.7,
+   gunB:0,   shieldB:0,  ghostB:0,  slowB:480,
+   body:'#74b9ff',wing:'#0984e3',head:'#dfe6e9',beak:'#b2bec3',eye:'#111',  aura:'#74b9ff', trail:'rgba(116,185,255,.5)'},
+
+  {id:'golden', name:'ЗОЛОТОЙ',   emoji:'✨',
+   skill:'Легенда: все бонусы по 4 сек каждые 10 труб',
+   skillIcon:'👑',
+   jumpM:1.1, gravM:0.88, hitM:0.8,
+   gunB:240, shieldB:240,ghostB:240,slowB:240,
+   body:'#f1c40f',wing:'#e67e22',head:'#fffde7',beak:'#e67e22',eye:'#2d3436',aura:'#f1c40f',trail:'rgba(241,196,15,.6)'},
 ];
 
 // ══════════════════════════════════════════
@@ -241,12 +365,13 @@ function checkRotate(){
 // ══════════════════════════════════════════
 let GRAV, JUMP, SPEED, GAP, PIPE_INT;
 function recalcPhysics(){
-  const sc = Math.min(W, H*16/9) / 800;
-  GRAV     = 0.20 * sc;
-  JUMP     = -5.5 * sc;
-  SPEED    = 3.0  * sc;
-  GAP      = Math.max(150, 230*(H/450));
-  PIPE_INT = Math.round(110/sc);
+  // Скорость масштабируется по ширине экрана + уровню сложности
+  const speedMult = [0.55, 0.75, 1.0, 1.35, 1.8][diffLevel-1];
+  SPEED    = W * 0.0055 * speedMult;
+  GRAV     = H * 0.00042;
+  JUMP     = H * -0.011;
+  GAP      = H * (0.44 - (diffLevel-1)*0.03); // на высоком уровне зазор меньше
+  PIPE_INT = Math.round(380 - (diffLevel-1)*30); // на высоком уровне трубы чаще
 }
 
 // ══════════════════════════════════════════
@@ -256,6 +381,7 @@ function recalcPhysics(){
 let STATE = 'menu';
 let birdIdx = 0;
 let playerName = 'ИГРОК';
+let diffLevel = 2; // 1-5, по умолчанию средний
 
 let bird, pipes, trails, particles;
 let score, frame, combo, comboTimer;
@@ -271,7 +397,37 @@ let tapBlink = 0;
 
 // Уровень сложности
 let level = 1;
-let lastLevelScore = 0; // счёт при последнем повышении уровня
+let lastLevelScore = 0;
+
+// Бонусы на экране
+let bonuses = [];
+// Активные бонусы на игроке
+let activeShield  = 0;  // кадров осталось
+let activeGhost   = 0;  // проход сквозь трубы
+let activeGun     = 0;  // уничтожение труб
+
+// Разблокировка птиц
+let unlockFlash     = 0;
+let unlockFlashBird = 0;
+
+// Тряска экрана
+let shakeDur   = 0;
+let shakeAmp   = 0;
+let activeSlow = 0;
+
+// Феникс: заряды пробития
+let phoenixCharges = 0;
+
+// Баннер выполненного задания
+let questFlash = 0;
+let questFlashText = '';
+
+// Монеты
+let coins = [];        // монеты на экране
+let sessionCoins = 0;  // собрано за игру
+const TOTAL_COINS_KEY = 'buria_coins_total';
+function getTotalCoins(){ return parseInt(localStorage.getItem(TOTAL_COINS_KEY)||'0'); }
+function addCoins(n){ localStorage.setItem(TOTAL_COINS_KEY, getTotalCoins()+n); }
 
 // ══════════════════════════════════════════
 // ИНИЦИАЛИЗАЦИЯ МИРА
@@ -281,7 +437,10 @@ function initWorld(){
   bird = {x:W*0.22, y:H/2, v:0, wing:0};
   pipes=[];trails=[];particles=[];
   score=0; frame=0; combo=0; comboTimer=0; level=1; lastLevelScore=0;
-  lightFlash=0; tapBlink=0;
+  biome=0; prevBiome=0; biomeAlpha=1; biomeAnimals=[];
+  initWeather();
+  spawnAnimals();
+  lightFlash=0; tapBlink=0; bonuses=[]; activeShield=0; activeGhost=0; activeGun=0; activeSlow=0; shakeDur=0; shakeAmp=0; unlockFlash=0; coins=[]; sessionCoins=0; sessionBonusCount=0;
 
   document.getElementById('hud-score').textContent = '0';
   document.getElementById('hud-combo').style.opacity = '0';
@@ -376,6 +535,8 @@ function onTap(e){
     // Первый тап — старт игры
     STATE = 'playing';
     frame = 0;
+    // Заряды феникса — инициализируем здесь когда birdIdx точно известен
+    phoenixCharges = getSkillLevel(BIRDS[birdIdx].id, 'explode');
     showEl('hud');
     document.getElementById('speedbar').style.display = 'block';
     doFlap();
@@ -388,7 +549,8 @@ function onTap(e){
 }
 
 function doFlap(){
-  bird.v = JUMP;
+  const bdef = BIRDS[birdIdx];
+  bird.v = JUMP * getBirdJumpM(bdef.id);
   const b = BIRDS[birdIdx];
   for(let i=0;i<5;i++) particles.push({
     x:bird.x-12, y:bird.y+4,
@@ -418,24 +580,24 @@ function clickMenu(){
 }
 
 // ══════════════════════════════════════════
-// ПРОГРЕССИЯ СЛОЖНОСТИ
-// Каждые 10 очков — новый уровень (макс 10)
+// ПРОГРЕССИЯ СЛОЖНОСТИ — плавная по score
+// Каждые 100 труб — лёгкое облегчение
 // ══════════════════════════════════════════
 function getDifficulty(){
-  // level 1..10
-  const lvl = Math.min(20, 1 + Math.floor(score / 5));
-  const t = (lvl-1)/19; // 0..1
+  // Плавный рост от 0 до 1 по мере накопления труб (насыщение к ~200)
+  const base = Math.min(1, score / 200);
+
+  // Каждые 100 труб — 10-трубное облегчение
+  const relief = (score > 0 && score % 100 < 10) ? 0.18 : 0;
+  const t = Math.max(0, base - relief);
+
+  const slowMult = activeSlow > 0 ? 0.45 : 1;
 
   return {
-    lvl,
-    // Скорость: от базовой до +90%
-    spd:  SPEED * (1 + t * 0.9),
-    // Зазор между трубами: от GAP до GAP*0.52 (почти вдвое уже)
-    gap:  GAP * (1 - t * 0.48),
-    // Интервал между трубами: чаще появляются
-    interval: Math.round(PIPE_INT * (1 - t * 0.35)),
-    // Ширина труб: чуть толще
-    pw: Math.max(60, Math.min(95, W*.09) * (1 + t * 0.25)),
+    spd:      SPEED * (1 + t * 1.1) * slowMult,
+    gap:      GAP   * (1 - t * 0.52),
+    interval: Math.round(PIPE_INT * Math.max(0.5, 1 - t * 0.45)),
+    pw:       Math.max(55, W * 0.08 * (1 + t * 0.3)),
   };
 }
 
@@ -443,19 +605,12 @@ function getDifficulty(){
 // ИГРОВАЯ ЛОГИКА
 // ══════════════════════════════════════════
 function updateGame(){
-  bird.v += GRAV;
-  bird.y += bird.v;
-  bird.wing += .15;
+  const bdef = BIRDS[birdIdx];
+  bird.v += GRAV * getBirdGravM(bdef.id) * DT;
+  bird.y += bird.v * DT;
+  bird.wing += .15 * DT;
 
   const diff = getDifficulty();
-
-  // Повышение уровня — показываем вспышку
-  if(diff.lvl > level){
-    level = diff.lvl;
-    lastLevelScore = score;
-    // Световая вспышка
-    lightFlash = 6;
-  }
 
   // Трубы — первая через interval кадров после старта
   if(frame > 0 && frame % diff.interval === 0){
@@ -466,1696 +621,2365 @@ function updateGame(){
     pipes.push({x:W+10, w:diff.pw, h:H-th-diff.gap,  top:false});
   }
 
-  if(comboTimer>0) comboTimer--;
+  if(comboTimer>0) comboTimer-=DT;
   else if(combo>0){ combo=0; updateComboUI(); }
+  if(activeShield>0) activeShield-=DT;
+  if(activeGhost>0)  activeGhost-=DT;
+  if(activeGun>0)    activeGun-=DT;
+  if(activeSlow>0)   activeSlow-=DT;
+  if(shakeDur>0)     shakeDur-=DT;
+  updateBonuses();
+  updateCoins();
+  updateAnimals();
 
-  const br = Math.min(W,H)/520*9;
+  const br = Math.min(W,H)/520*9 * getBirdHitM(BIRDS[birdIdx].id);
 
   for(let i=pipes.length-1; i>=0; i--){
     const p = pipes[i];
-    p.x -= diff.spd;
+    p.x -= diff.spd * DT;
 
     const py = p.top ? 0 : H-p.h;
-    if(bird.x+br > p.x && bird.x-br < p.x+p.w &&
-       bird.y+br > py  && bird.y-br < py+p.h){
-      triggerDeath(); return;
-    }
-
-    if(!p.passed && p.top && p.x+p.w < bird.x){
-      p.passed=true; score++;
-      combo++; comboTimer=110;
-      document.getElementById('hud-score').textContent = score;
-      updateComboUI();
-      spawnPts();
-      // Спидбар = прогресс внутри текущего уровня (0..100%)
-      const progressInLevel = ((score % 5) / 5) * 100;
-      document.getElementById('speedbar-fill').style.width = progressInLevel+'%';
-    }
-    if(p.x < -p.w-10) pipes.splice(i,1);
-  }
-
-  if(bird.y > H+20 || bird.y < -20) triggerDeath();
-
-  if(Math.random()<.0012 && lightFlash<=0) lightFlash=10+Math.floor(Math.random()*8);
-  if(lightFlash>0) lightFlash--;
-
-  frame++;
-}
-
-function updateComboUI(){
-  const el = document.getElementById('hud-combo');
-  if(combo>=3){ el.style.opacity='1'; el.textContent='×'+combo+' КОМБО!'; }
-  else el.style.opacity='0';
-}
-
-function spawnPts(){
-  const cols=['#f1c40f','#e67e22','#2ecc71','#fff'];
-  for(let i=0;i<7;i++) particles.push({
-    x:bird.x, y:bird.y,
-    vx:(Math.random()-.5)*5, vy:-Math.random()*4-1,
-    r:3+Math.random()*4, col:cols[i%4], life:1
-  });
-}
-
-function updateIdle(){
-  bird.y = H/2 + Math.sin(frame*.05)*16;
-  bird.v = Math.cos(frame*.05)*.8;
-  bird.wing += .09;
-  frame++;
-}
-
-// ══════════════════════════════════════════
-// СМЕРТЬ
-// ══════════════════════════════════════════
-function triggerDeath(){
-  if(STATE==='over') return;
-  STATE = 'over';
-  hideEl('hud');
-  document.getElementById('speedbar').style.display='none';
-
-  for(let i=0;i<24;i++) particles.push({
-    x:bird.x, y:bird.y,
-    vx:(Math.random()-.5)*11, vy:(Math.random()-.5)*11,
-    r:4+Math.random()*8, col:['#e74c3c','#f1c40f','#fff'][i%3], life:1
-  });
-
-  const rec = saveScore(playerName, score, BIRDS[birdIdx].id);
-  setTimeout(()=>showGameOver(rec), 800);
-}
-
-function showGameOver(rec){
-  document.getElementById('go-score').textContent = score+' ОЧКОВ';
-  document.getElementById('go-best').textContent =
-    rec.isNew ? '🎉 НОВЫЙ РЕКОРД!' : ('Твой рекорд: '+rec.best);
-  renderLB('lb-rows');
-  showEl('gameover');
-}
-
-// ══════════════════════════════════════════
-// РЕЙТИНГ
-// ══════════════════════════════════════════
-const LB_KEY = 'buria_orlov_v1';
-function getLB(){ try{return JSON.parse(localStorage.getItem(LB_KEY)||'[]');}catch(e){return[];} }
-
-function saveScore(name, s, birdId){
-  let lb = getLB();
-  const ei = lb.findIndex(e=>e.name.toLowerCase()===name.toLowerCase());
-  let prev=0, isNew=false;
-  if(ei>=0){ prev=lb[ei].s; if(s>prev){lb[ei]={name,s,birdId};isNew=true;} }
-  else{ lb.push({name,s,birdId}); isNew=true; }
-  lb.sort((a,b)=>b.s-a.s);
-  lb=lb.slice(0,20);
-  localStorage.setItem(LB_KEY, JSON.stringify(lb));
-  return {best:Math.max(s,prev), isNew};
-}
-
-function renderLB(cid){
-  const lb = getLB();
-  const el = document.getElementById(cid);
-  const ranks = ['🥇','🥈','🥉','4.','5.','6.','7.','8.'];
-  const me = playerName.toLowerCase();
-  if(!lb.length){
-    el.innerHTML='<div class="lb-row" style="opacity:.4;justify-content:center">Нет рекордов</div>';
-    return;
-  }
-  el.innerHTML = lb.slice(0,6).map((e,i)=>{
-    const isMe = e.name.toLowerCase()===me;
-    const bd = BIRDS.find(b=>b.id===e.birdId)||BIRDS[0];
-    return `<div class="lb-row${isMe?' lb-me':''}">
-      <span class="lb-rank">${ranks[i]||i+1+'.'}</span>
-      <span class="lb-icon">${bd.emoji}</span>
-      <span class="lb-name${isMe?' me':''}">${esc(e.name)}</span>
-      <span class="lb-pts">${e.s}</span>
-    </div>`;
-  }).join('');
-}
-
-function esc(s){
-  return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-}
-
-// ══════════════════════════════════════════
-// РИСОВАНИЕ ФОНА
-// ══════════════════════════════════════════
-function lp3(a,b,t){ return a.map((v,i)=>Math.round(v+(b[i]-v)*Math.max(0,Math.min(1,t)))); }
-
-function drawSky(){
-  const N=[[8,6,22],[12,10,35]], D=[[60,20,60],[100,30,80]],
-        Y=[[28,95,185],[95,172,245]], S=[[75,28,18],[170,75,28]];
-  let top,bot; const c=cycleDayNight;
-  if(c<.25){const t=c/.25;       top=lp3(N[0],D[0],t);bot=lp3(N[1],D[1],t);}
-  else if(c<.5){const t=(c-.25)/.25; top=lp3(D[0],Y[0],t);bot=lp3(D[1],Y[1],t);}
-  else if(c<.75){const t=(c-.5)/.25;  top=lp3(Y[0],S[0],t);bot=lp3(Y[1],S[1],t);}
-  else{const t=(c-.75)/.25;           top=lp3(S[0],N[0],t);bot=lp3(S[1],N[1],t);}
-  if(lightFlash>0){const f=lightFlash/12;top=lp3(top,[230,235,255],f*.8);bot=lp3(bot,[190,210,255],f*.6);}
-  const g=CX.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,`rgb(${top})`); g.addColorStop(1,`rgb(${bot})`);
-  CX.fillStyle=g; CX.fillRect(0,0,W,H);
-}
-
-function drawStars(){
-  const al=cycleDayNight<.3?1:cycleDayNight<.5?1-(cycleDayNight-.3)/.2:0;
-  if(al<=0) return;
-  stars.forEach(s=>{
-    s.tw+=.035;
-    CX.globalAlpha=al*(.4+Math.sin(s.tw)*.6);
-    CX.fillStyle='#fff';
-    if(s.r>0){CX.beginPath(); CX.arc(s.x,s.y,s.r,0,Math.PI*2); CX.fill();}
-  });
-  CX.globalAlpha=1;
-}
-
-function drawCelestial(){
-  const sx=W*.82, c=cycleDayNight;
-  const sy=H*.13+Math.sin(c*Math.PI*2)*H*.08;
-  if(c>.18&&c<.82){
-    const op=c<.28?(c-.18)/.1:c>.72?1-(c-.72)/.1:1;
-    CX.globalAlpha=op;
-    const sg=CX.createRadialGradient(sx,sy,0,sx,sy,55);
-    sg.addColorStop(0,'rgba(255,255,195,1)'); sg.addColorStop(.45,'rgba(255,215,45,.75)'); sg.addColorStop(1,'rgba(255,140,0,0)');
-    CX.fillStyle=sg; CX.beginPath(); CX.arc(sx,sy,55,0,Math.PI*2); CX.fill();
-    CX.globalAlpha=1;
-  } else {
-    const ma=c<.1?1-c/.1:c>.9?(c-.9)/.1:1;
-    CX.globalAlpha=Math.max(0,ma);
-    CX.fillStyle='#ddeeff'; CX.beginPath(); CX.arc(sx,sy,20,0,Math.PI*2); CX.fill();
-    CX.fillStyle='rgba(140,170,210,.55)'; CX.beginPath(); CX.arc(sx+7,sy-4,16,0,Math.PI*2); CX.fill();
-    CX.globalAlpha=1;
-  }
-}
-
-function drawMountains(){
-  const c=cycleDayNight;
-  const cols=[
-    c<.5?lp3([18,28,55],[75,55,75],c*2):lp3([75,55,75],[38,18,28],(c-.5)*2),
-    c<.5?lp3([13,22,45],[55,38,55],c*2):lp3([55,38,55],[28,13,22],(c-.5)*2),
-    c<.5?lp3([8,16,35],[38,22,38],c*2) :lp3([38,22,38],[18,8,14],(c-.5)*2),
-  ];
-  mountains.forEach((m,li)=>{
-    const spd=m.sp*(SPEED/3)*.14;
-    m.pts.forEach(p=>p.x-=spd);
-    if(m.pts[0].x<-W/m.pts.length*2){
-      const last=m.pts[m.pts.length-1];
-      m.pts.shift();
-      m.pts.push({x:last.x+W/10,y:H*(.52+li*.13)-Math.random()*H*(.18-li*.04)});
-    }
-    CX.fillStyle=`rgb(${cols[li]})`;
-    CX.beginPath(); CX.moveTo(0,H);
-    m.pts.forEach(p=>CX.lineTo(p.x,p.y));
-    CX.lineTo(W,H); CX.closePath(); CX.fill();
-    if(li===0){
-      CX.fillStyle=`rgba(255,255,255,${.12+c*.08})`;
-      m.pts.forEach((p,i)=>{
-        if(i===0||i===m.pts.length-1)return;
-        CX.beginPath(); CX.moveTo(p.x-14,p.y+16); CX.lineTo(p.x,p.y); CX.lineTo(p.x+14,p.y+16); CX.closePath(); CX.fill();
+    // Gun — уничтожаем трубу при касании
+    if(activeGun>0 && bird.x+br > p.x && bird.x-br < p.x+p.w){
+      // Взрыв трубы
+      for(let ei=0;ei<8;ei++) particles.push({
+        x:p.x+p.w/2, y:py+p.h/2,
+        vx:(Math.random()-.5)*8, vy:(Math.random()-.5)*8,
+        r:4+Math.random()*5, col:'#e74c3c', life:1
       });
+      pipes.splice(i,1); continue;
     }
-  });
-}
-
-function drawClouds(){
-  clouds.forEach(cl=>{
-    cl.x-=cl.sp*(SPEED/3);
-    if(cl.x<-180){cl.x=W+130;cl.y=30+Math.random()*H*.35;}
-    CX.globalAlpha=.06+cycleDayNight*.11; CX.fillStyle='#fff';
-    var cr1=Math.max(0,46*cl.s),cr2=Math.max(0,32*cl.s);
-    [-1,0,1].forEach(d=>{ CX.beginPath(); CX.arc(cl.x+d*38*cl.s,cl.y,cr1,0,Math.PI*2); CX.fill(); });
-    CX.beginPath(); CX.arc(cl.x,cl.y-22*cl.s,cr2,0,Math.PI*2); CX.fill();
-    CX.globalAlpha=1;
-  });
-}
-
-function drawPipes(){
-  const night=cycleDayNight<.25||cycleDayNight>.75;
-  pipes.forEach(p=>{
-    const py=p.top?0:H-p.h;
-    const rg=CX.createLinearGradient(p.x,0,p.x+p.w,0);
-    if(night){rg.addColorStop(0,'#0b1824');rg.addColorStop(.5,'#162433');rg.addColorStop(1,'#081018');}
-    else{rg.addColorStop(0,'#18182a');rg.addColorStop(.5,'#282840');rg.addColorStop(1,'#101020');}
-    CX.fillStyle=rg;
-    rrect(CX,p.x,py,p.w,p.h,p.top?[0,0,10,10]:[10,10,0,0]); CX.fill();
-    const nc=night?'#3498db':'#7c4dff';
-    CX.strokeStyle=nc; CX.lineWidth=2; CX.shadowBlur=night?14:6; CX.shadowColor=nc;
-    rrect(CX,p.x,py,p.w,p.h,p.top?[0,0,10,10]:[10,10,0,0]); CX.stroke();
-    CX.shadowBlur=0;
-    CX.fillStyle=nc; CX.globalAlpha=.65;
-    if(p.top) CX.fillRect(p.x,p.h-5,p.w,5); else CX.fillRect(p.x,H-p.h,p.w,5);
-    CX.globalAlpha=1;
-  });
-}
-
-// ══════════════════════════════════════════
-// РИСОВАНИЕ ОТСЧЁТА И "TAP" НА CANVAS
-// ══════════════════════════════════════════
-function drawOverlayCanvas(){
-  const cx=W/2, cy=H/2;
-
-  if(STATE==='countdown'){
-    // Полупрозрачный фон
-    CX.fillStyle='rgba(0,0,0,.45)';
-    CX.fillRect(0,0,W,H);
-    // Большое число
-    const sz=Math.min(W,H)*.28;
-    CX.font=`900 ${sz}px Arial, sans-serif`;
-    CX.textAlign='center';
-    CX.textBaseline='middle';
-    // Тень-свечение
-    CX.shadowBlur=60; CX.shadowColor='rgba(241,196,15,.9)';
-    CX.fillStyle='#f1c40f';
-    CX.fillText(String(cdNum), cx, cy);
-    CX.shadowBlur=0;
-    // Подпись птицы снизу
-    const bdef=BIRDS[birdIdx];
-    CX.font=`700 ${Math.min(W,H)*.04}px Arial, sans-serif`;
-    CX.fillStyle='rgba(255,255,255,.55)';
-    CX.fillText(bdef.emoji+' '+bdef.name, cx, cy+sz*.72);
-    // Маленький текст «нажми чтобы пропустить»
-    CX.font=`400 ${Math.min(W,H)*.025}px Arial, sans-serif`;
-    CX.fillStyle='rgba(255,255,255,.25)';
-    CX.fillText('нажми чтобы пропустить', cx, cy+sz*.72+Math.min(W,H)*.055);
-    CX.textAlign='left'; CX.textBaseline='alphabetic';
-    return;
-  }
-
-  if(STATE==='ready'){
-    // Мигающая подсказка
-    tapBlink += .05;
-    const alpha = .45+Math.sin(tapBlink)*0.55;
-    const fontSize = Math.min(W,H)*.055;
-    const text = '👆  НАЖМИ ЧТОБЫ ЛЕТЕТЬ';
-    CX.font=`700 ${fontSize}px Arial, sans-serif`;
-    CX.textAlign='center';
-    CX.textBaseline='middle';
-    // Плашка
-    const tw=CX.measureText(text).width;
-    const ph=fontSize*1.5, pw2=tw+fontSize*1.2;
-    const bx=cx-pw2/2, by=cy-ph/2;
-    CX.fillStyle=`rgba(0,0,0,${alpha*.65})`;
-    rrect(CX,bx,by,pw2,ph,ph/2); CX.fill();
-    CX.strokeStyle=`rgba(255,255,255,${alpha*.4})`;
-    CX.lineWidth=1.5;
-    rrect(CX,bx,by,pw2,ph,ph/2); CX.stroke();
-    CX.globalAlpha=alpha;
-    CX.fillStyle='#fff';
-    CX.shadowBlur=18; CX.shadowColor='rgba(255,255,255,.6)';
-    CX.fillText(text, cx, cy);
-    CX.shadowBlur=0; CX.globalAlpha=1;
-    // Имя птицы под надписью
-    const bdef=BIRDS[birdIdx];
-    CX.font=`600 ${fontSize*.55}px Arial, sans-serif`;
-    CX.fillStyle='rgba(255,255,255,.4)';
-    CX.fillText(bdef.emoji+' '+bdef.name, cx, cy+fontSize*1.3);
-    CX.textAlign='left'; CX.textBaseline='alphabetic';
-  }
-}
-
-// ══════════════════════════════════════════
-// РИСОВАНИЕ ПТИЦЫ
-// ══════════════════════════════════════════
-function drawBird(){
-  const b=BIRDS[birdIdx];
-  const sc=Math.min(W,H)/520;
-  CX.save();
-  CX.translate(bird.x,bird.y);
-  const angle=Math.min(Math.PI/5,Math.max(-Math.PI/4,bird.v*.07));
-  CX.rotate(angle);
-  if(b.aura){CX.shadowBlur=18;CX.shadowColor=b.aura;}
-  if(combo>=3){CX.shadowBlur=28;CX.shadowColor='#f1c40f';}
-  CX.scale(sc,sc);
-  const wf=Math.sin(bird.wing)*22;
-  CX.fillStyle=b.wing;
-  CX.beginPath(); CX.moveTo(-18,2); CX.quadraticCurveTo(0,-wf-24,18,2); CX.fill();
-  CX.strokeStyle=b.body; CX.lineWidth=1; CX.globalAlpha=.4;
-  for(let f=1;f<=3;f++){
-    CX.beginPath(); CX.moveTo(-18+f*9,2);
-    CX.quadraticCurveTo(-14+f*9,-wf*.5-f*3,-14+f*9,2); CX.stroke();
-  }
-  CX.globalAlpha=1;
-  CX.fillStyle=b.body;
-  CX.beginPath(); CX.ellipse(0,0,25,10,0,0,Math.PI*2); CX.fill();
-  CX.fillStyle=b.head; CX.shadowBlur=0;
-  CX.beginPath(); CX.arc(17,-4,10,0,Math.PI*2); CX.fill();
-  CX.fillStyle=b.beak;
-  CX.beginPath(); CX.moveTo(24,-4); CX.lineTo(36,-1); CX.lineTo(24,2); CX.fill();
-  CX.fillStyle=b.eye;
-  CX.beginPath(); CX.arc(20,-5,3,0,Math.PI*2); CX.fill();
-  CX.fillStyle='#fff'; CX.beginPath(); CX.arc(21,-5.8,1.2,0,Math.PI*2); CX.fill();
-  CX.fillStyle=b.wing;
-  CX.beginPath(); CX.moveTo(-23,0); CX.lineTo(-35,-7); CX.lineTo(-27,3);  CX.fill();
-  CX.beginPath(); CX.moveTo(-23,2); CX.lineTo(-33,10); CX.lineTo(-26,5);  CX.fill();
-  CX.beginPath(); CX.moveTo(-23,1); CX.lineTo(-36,2);  CX.lineTo(-27,4);  CX.fill();
-  if(b.id==='phoenix'){
-    CX.globalAlpha=.7;
-    ['#ff6b35','#f1c40f','#e74c3c'].forEach((col,ci)=>{
-      CX.fillStyle=col;
-      CX.beginPath();
-      CX.moveTo(-23+ci*3,ci*2);
-      CX.quadraticCurveTo(-30+ci*2,-9-Math.sin(frame*.14+ci)*7,-35+ci*3,-4+ci);
-      CX.quadraticCurveTo(-28+ci,-2+Math.cos(frame*.14+ci)*4,-23+ci*3,ci*2);
-      CX.fill();
-    });
-    CX.globalAlpha=1;
-  }
-  CX.restore();
-  trails.push({x:bird.x-10,y:bird.y,r:5,life:1});
-  if(trails.length>20) trails.shift();
-  trails.forEach(t=>t.life-=.06);
-  trails=trails.filter(t=>t.life>0);
-  trails.forEach(t=>{
-    CX.globalAlpha=t.life*.45; CX.fillStyle=b.trail;
-    var tr=t.r*t.life; if(tr>0){CX.beginPath(); CX.arc(t.x,t.y,tr,0,Math.PI*2); CX.fill();}
-  });
-  CX.globalAlpha=1;
-}
-
-function drawParticles(){
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    p.x+=p.vx; p.y+=p.vy; p.vy+=.08;
-    p.life-=.03; p.r*=.96;
-    if(p.life<=0){particles.splice(i,1);continue;}
-    CX.globalAlpha=p.life; CX.fillStyle=p.col;
-    if(p.r>0){CX.beginPath(); CX.arc(p.x,p.y,p.r,0,Math.PI*2); CX.fill();}
-  }
-  CX.globalAlpha=1;
-}
-
-// ══════════════════════════════════════════
-// ПРЕДПРОСМОТР ПТИЦЫ В МЕНЮ
-// ══════════════════════════════════════════
-function buildSelector(){
-  const grid=document.getElementById('sel-grid');
-  grid.innerHTML='';
-  BIRDS.forEach((b,i)=>{
-    const div=document.createElement('div');
-    div.className='sel-card'+(i===0?' active':'');
-    const cv=document.createElement('canvas'); cv.width=54; cv.height=54;
-    const nm=document.createElement('div'); nm.className='cname'; nm.textContent=b.name;
-    const tg=document.createElement('div'); tg.className='ctag';  tg.textContent=b.tag;
-    div.append(cv,nm,tg);
-    div.onclick=()=>{
-      document.querySelectorAll('.sel-card').forEach(c=>c.classList.remove('active'));
-      div.classList.add('active');
-      birdIdx=i;
-    };
-    grid.appendChild(div);
-    drawPreview(b,cv);
-  });
-}
-
-function drawPreview(b,cv){
-  const c=cv.getContext('2d');
-  c.save(); c.translate(27,27);
-  c.fillStyle=b.wing; c.beginPath(); c.moveTo(-14,0); c.quadraticCurveTo(0,-20,14,0); c.fill();
-  c.fillStyle=b.body; c.beginPath(); c.ellipse(0,0,20,8,0,0,Math.PI*2); c.fill();
-  c.fillStyle=b.head; c.beginPath(); c.arc(16,-4,9,0,Math.PI*2); c.fill();
-  c.fillStyle=b.beak; c.beginPath(); c.moveTo(22,-4); c.lineTo(32,-1); c.lineTo(22,2); c.fill();
-  c.fillStyle=b.eye;  c.beginPath(); c.arc(19,-5,2.5,0,Math.PI*2); c.fill();
-  c.fillStyle='#fff'; c.beginPath(); c.arc(20,-5.5,1,0,Math.PI*2); c.fill();
-  c.fillStyle=b.wing;
-  c.beginPath(); c.moveTo(-20,0); c.lineTo(-30,-5); c.lineTo(-24,2); c.fill();
-  c.beginPath(); c.moveTo(-20,2); c.lineTo(-28,8);  c.lineTo(-23,4); c.fill();
-  if(b.aura){
-    c.shadowBlur=12; c.shadowColor=b.aura;
-    c.strokeStyle=b.aura; c.lineWidth=1.5;
-    c.beginPath(); c.ellipse(0,0,21,9,0,0,Math.PI*2); c.stroke();
-    c.shadowBlur=0;
-  }
-  c.restore();
-}
-
-
-// ══════════════════════════════════════════
-// УРОВЕНЬ И LEVEL-UP НА CANVAS
-// ══════════════════════════════════════════
-function drawLevelHud(){
-  if(STATE!=='playing' && STATE!=='over') return;
-
-  const diff = getDifficulty();
-  const fs = Math.min(W,H)*.028;
-
-  // Уровень — правый верхний угол (под комбо)
-  CX.save();
-  CX.textAlign='right';
-  CX.textBaseline='top';
-  CX.font='700 '+fs+'px Arial,sans-serif';
-
-  // Цвет уровня: зелёный→жёлтый→красный
-  const t=(level-1)/9;
-  const r=Math.round(80+t*175), g=Math.round(220-t*120), b=80;
-  const col='rgb('+r+','+g+','+b+')';
-
-  CX.fillStyle='rgba(0,0,0,.4)';
-  CX.fillRect(W-fs*5.5, fs*.5, fs*5, fs*1.6);
-
-  CX.fillStyle=col;
-  CX.shadowBlur=8; CX.shadowColor=col;
-  CX.fillText('УР. '+level+' / 20', W-fs*.6, fs*.7);
-  CX.shadowBlur=0;
-  CX.restore();
-}
-
-// ══════════════════════════════════════════
-// ГЛАВНЫЙ ЦИКЛ
-// ══════════════════════════════════════════
-function loop(){
-  cycleDayNight=(cycleDayNight+.00035)%1;
-  CX.clearRect(0,0,W,H);
-
-  // Фон рисуется всегда (красиво за меню тоже)
-  drawSky();
-  drawStars();
-  drawCelestial();
-  drawMountains();
-  drawClouds();
-
-  // Трубы — только в игре и после смерти
-  if(STATE==='playing'||STATE==='over') drawPipes();
-
-  // Птица + частицы — всегда кроме меню
-  if(STATE!=='menu'){
-    if(STATE==='countdown'||STATE==='ready') updateIdle();
-    if(STATE==='playing') updateGame();
-    drawBird();
-    drawParticles();
-    drawLevelHud();
-    // Отсчёт/tap — рисуем НА canvas поверх всего
-    drawOverlayCanvas();
-  }
-
-  requestAnimationFrame(loop);
-}
-
-// ══════════════════════════════════════════
-// ЗАПУСК
-// ══════════════════════════════════════════
-resize();
-buildSelector();
-initWorld();
-loop(); // ← запускаем цикл сразу
-</script>
-</body>
-</html>
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<title>Буря Орлов</title>
-<style>
-*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;font-family:'Segoe UI',Arial,sans-serif}
-canvas{display:block;position:fixed;top:0;left:0}
-
-/* ── ПОВЕРНУТЬ ЭКРАН ── */
-#rotate{display:none;position:fixed;inset:0;z-index:9999;background:#05080f;
-  flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
-#rotate-icon{font-size:72px;animation:rtilt 1.5s ease-in-out infinite alternate}
-@keyframes rtilt{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
-#rotate p{color:#f1c40f;font-size:20px;font-weight:700;letter-spacing:2px;padding:0 20px}
-
-/* ── МЕНЮ ВЫБОРА ПТИЦЫ — поверх всего ── */
-#menu{position:fixed;inset:0;z-index:500;background:rgba(3,6,18,.95);
-  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:16px}
-
-.sel-title{font-size:clamp(28px,6vw,48px);font-weight:900;letter-spacing:3px;
-  background:linear-gradient(135deg,#f1c40f,#e67e22);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-  margin-bottom:4px;text-align:center}
-.sel-sub{font-size:12px;letter-spacing:5px;color:rgba(255,255,255,.35);margin-bottom:16px;text-align:center}
-
-.sel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;
-  width:100%;max-width:680px;margin-bottom:16px}
-.sel-card{background:rgba(255,255,255,.05);border:2px solid rgba(255,255,255,.12);
-  border-radius:14px;padding:10px 6px 8px;cursor:pointer;transition:.2s;text-align:center}
-.sel-card:hover{border-color:rgba(241,196,15,.7);transform:translateY(-3px)}
-.sel-card.active{border-color:#f1c40f;background:rgba(241,196,15,.1)}
-.sel-card canvas{display:block;margin:0 auto 6px;width:54px;height:54px}
-.sel-card .cname{font-size:11px;font-weight:700;letter-spacing:1px;color:rgba(255,255,255,.7)}
-.sel-card.active .cname{color:#f1c40f}
-.sel-card .ctag{font-size:9px;color:rgba(255,255,255,.3);margin-top:2px}
-
-.sel-name-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;width:100%;max-width:500px}
-.sel-name-row input{flex:1;padding:12px 16px;border-radius:10px;
-  border:2px solid rgba(241,196,15,.3);background:rgba(255,255,255,.07);
-  color:#fff;font-size:16px;font-weight:700;outline:none;text-align:center;
-  font-family:inherit;transition:.2s}
-.sel-name-row input:focus{border-color:#f1c40f;box-shadow:0 0 14px rgba(241,196,15,.25)}
-.sel-name-row input::placeholder{color:rgba(255,255,255,.3)}
-
-.sel-btns{display:flex;gap:12px;width:100%;max-width:500px}
-.btn-play{flex:2;padding:15px;border:none;border-radius:12px;
-  background:linear-gradient(135deg,#f1c40f,#e67e22);
-  color:#000;font-size:18px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:.2s}
-.btn-play:hover{transform:scale(1.03);box-shadow:0 0 24px rgba(241,196,15,.5)}
-.btn-play:active{transform:scale(.97)}
-.btn-anon{flex:1;padding:15px;border:1px solid rgba(255,255,255,.2);border-radius:12px;
-  background:rgba(255,255,255,.07);color:rgba(255,255,255,.7);
-  font-size:14px;font-weight:700;letter-spacing:1px;cursor:pointer;transition:.2s}
-.btn-anon:hover{background:rgba(255,255,255,.14)}
-
-/* ── GAME OVER — поверх всего ── */
-#gameover{position:fixed;inset:0;z-index:500;display:none;
-  background:rgba(3,6,18,.93);backdrop-filter:blur(12px);
-  flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px}
-.go-title{font-size:clamp(36px,9vw,64px);font-weight:900;
-  color:#e74c3c;text-shadow:0 0 30px rgba(231,76,60,.7)}
-.go-score{font-size:clamp(24px,5vw,40px);font-weight:900;color:#f1c40f}
-.go-best{font-size:13px;color:rgba(255,255,255,.4);letter-spacing:2px}
-.go-lb{width:100%;max-width:440px;background:rgba(0,0,0,.4);
-  border:1px solid rgba(255,255,255,.1);border-radius:12px;overflow:hidden}
-.go-lb-head{padding:8px 14px;background:rgba(241,196,15,.08);
-  font-size:11px;letter-spacing:4px;color:#f1c40f;font-weight:700;
-  border-bottom:1px solid rgba(241,196,15,.12)}
-.lb-row{display:flex;align-items:center;gap:8px;padding:7px 14px;
-  border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;font-weight:600}
-.lb-row:last-child{border-bottom:none}
-.lb-me{background:rgba(241,196,15,.07)}
-.lb-rank{width:22px;font-size:15px;text-align:center}
-.lb-icon{font-size:16px}
-.lb-name{flex:1;color:rgba(255,255,255,.8)}
-.lb-name.me{color:#f1c40f}
-.lb-pts{color:#f1c40f;font-weight:900;font-size:15px}
-.go-btns{display:flex;gap:12px}
-.btn-again{padding:14px 32px;border:none;border-radius:12px;
-  background:linear-gradient(135deg,#2ecc71,#16a085);
-  color:#fff;font-size:16px;font-weight:900;letter-spacing:2px;cursor:pointer;transition:.2s}
-.btn-again:hover{transform:scale(1.04)}
-.btn-again:active{transform:scale(.96)}
-.btn-back{padding:14px 24px;border:1px solid rgba(255,255,255,.2);border-radius:12px;
-  background:rgba(255,255,255,.08);color:#fff;font-size:16px;font-weight:700;
-  letter-spacing:1px;cursor:pointer;transition:.2s}
-.btn-back:hover{background:rgba(255,255,255,.15)}
-.btn-back:active{transform:scale(.96)}
-
-/* ── HUD ── */
-#hud{position:fixed;top:0;left:0;right:0;z-index:100;pointer-events:none;
-  display:none;align-items:flex-start;justify-content:space-between;padding:10px 18px}
-#hud-score{font-size:clamp(30px,6vw,52px);font-weight:900;
-  color:#f1c40f;text-shadow:0 0 18px rgba(241,196,15,.8),0 2px 4px #000;line-height:1}
-#hud-label{font-size:10px;letter-spacing:3px;color:rgba(255,255,255,.4);margin-top:2px}
-#hud-combo{font-size:clamp(14px,2.5vw,22px);color:#e74c3c;font-weight:900;
-  text-shadow:0 0 12px rgba(231,76,60,.9);opacity:0;transition:opacity .3s;text-align:right}
-#speedbar{position:fixed;bottom:0;left:0;right:0;height:4px;z-index:100;
-  background:rgba(255,255,255,.1);display:none}
-#speedbar-fill{height:100%;width:0%;background:linear-gradient(90deg,#2ecc71,#f1c40f,#e74c3c);transition:width .5s}
-
-@media(max-width:600px){
-  .sel-grid{gap:7px}
-  .sel-card canvas{width:44px;height:44px}
-  .sel-btns{flex-direction:column}
-  .go-btns{flex-direction:column;width:100%;max-width:300px}
-  .btn-again,.btn-back{width:100%}
-}
-@media(max-height:400px){
-  .sel-card{padding:6px 4px 4px}
-  .sel-card canvas{width:38px;height:38px}
-  .sel-sub{margin-bottom:8px}
-  .sel-name-row{margin-bottom:8px}
-}
-</style>
-</head>
-<body>
-
-<div id="rotate">
-  <div id="rotate-icon">📱</div>
-  <p>ПОВЕРНИ ТЕЛЕФОН<br>ГОРИЗОНТАЛЬНО</p>
-</div>
-
-<!-- ГЛАВНЫЙ CANVAS — единственная интерактивная поверхность во время игры -->
-<canvas id="c"></canvas>
-
-<!-- МЕНЮ ВЫБОРА ПТИЦЫ -->
-<div id="menu">
-  <div class="sel-title">🦅 БУРЯ ОРЛОВ</div>
-  <div class="sel-sub">ВЫБЕРИ ПТИЦУ — ЛЕТИ — ПОБЕЖДАЙ</div>
-  <div class="sel-grid" id="sel-grid"></div>
-  <div class="sel-name-row">
-    <input type="text" id="inp-name" placeholder="Введи имя (необязательно)"
-           maxlength="12" autocomplete="off" autocorrect="off" spellcheck="false">
-  </div>
-  <div class="sel-btns">
-    <button class="btn-play" onclick="clickPlay()">▶ ИГРАТЬ</button>
-    <button class="btn-anon" onclick="clickAnon()">Без имени</button>
-  </div>
-</div>
-
-<!-- GAME OVER -->
-<div id="gameover">
-  <div class="go-title">💥 КРУШЕНИЕ!</div>
-  <div class="go-score" id="go-score">0 ОЧКОВ</div>
-  <div class="go-best"  id="go-best"></div>
-  <div class="go-lb">
-    <div class="go-lb-head">🏆 ТАБЛИЦА РЕКОРДОВ</div>
-    <div id="lb-rows"></div>
-  </div>
-  <div class="go-btns">
-    <button class="btn-again" onclick="clickAgain()">↻ ЕЩЁ РАЗ</button>
-    <button class="btn-back"  onclick="clickMenu()">⌂ МЕНЮ</button>
-  </div>
-</div>
-
-<!-- HUD -->
-<div id="hud">
-  <div>
-    <div id="hud-score">0</div>
-    <div id="hud-label">ОЧКИ</div>
-  </div>
-  <div id="hud-combo"></div>
-</div>
-<div id="speedbar"><div id="speedbar-fill"></div></div>
-
-<script>
-// ══════════════════════════════════════════
-// ПТИЦЫ
-// ══════════════════════════════════════════
-const BIRDS=[
-  {id:'eagle',  name:'ОРЁЛ',      tag:'КЛАССИКА', emoji:'🦅',body:'#5d4037',wing:'#3e2723',head:'#fff8e1',beak:'#f59e0b',eye:'#111',  aura:null,       trail:'rgba(139,90,43,.4)'},
-  {id:'phoenix',name:'ФЕНИКС',    tag:'ОГОНЬ',    emoji:'🔥',body:'#e74c3c',wing:'#922b21',head:'#f39c12',beak:'#e67e22',eye:'#fff',  aura:'#ff6b35',  trail:'rgba(231,76,60,.5)'},
-  {id:'raven',  name:'ВОРОН',     tag:'ТЕНЬ',     emoji:'🐦',body:'#1a1a2e',wing:'#0d0d1a',head:'#2c2c54',beak:'#95a5a6',eye:'#6c5ce7',aura:'#6c5ce7', trail:'rgba(108,92,231,.4)'},
-  {id:'falcon', name:'СОКОЛ',     tag:'СКОРОСТЬ', emoji:'🦅',body:'#2c3e50',wing:'#1a252f',head:'#ecf0f1',beak:'#e67e22',eye:'#e74c3c',aura:'#3498db', trail:'rgba(52,73,94,.4)'},
-  {id:'parrot', name:'ПОПУГАЙ',   tag:'УДАЧА',    emoji:'🦜',body:'#27ae60',wing:'#1e8449',head:'#f1c40f',beak:'#e74c3c',eye:'#fff',  aura:'#f1c40f',  trail:'rgba(39,174,96,.4)'},
-  {id:'storm',  name:'БУРЕВЕСТ.', tag:'ЛЕГЕНДА',  emoji:'⚡',body:'#7f8c8d',wing:'#636e72',head:'#dfe6e9',beak:'#fdcb6e',eye:'#6c5ce7',aura:'#fdcb6e', trail:'rgba(127,140,141,.5)'},
-  {id:'ice',    name:'ЛЕДЯНОЙ',   tag:'АРКТИКА',  emoji:'❄️',body:'#74b9ff',wing:'#0984e3',head:'#dfe6e9',beak:'#b2bec3',eye:'#111',  aura:'#74b9ff',  trail:'rgba(116,185,255,.5)'},
-  {id:'golden', name:'ЗОЛОТОЙ',   tag:'РЕДКИЙ',   emoji:'✨',body:'#f1c40f',wing:'#e67e22',head:'#fffde7',beak:'#e67e22',eye:'#2d3436',aura:'#f1c40f', trail:'rgba(241,196,15,.6)'},
-];
-
-// ══════════════════════════════════════════
-// CANVAS
-// ══════════════════════════════════════════
-const CV = document.getElementById('c');
-const CX = CV.getContext('2d');
-
-// rrect — замена roundRect (поддержка старых браузеров)
-// r может быть числом или массивом [tl,tr,br,bl]
-function rrect(ctx,x,y,w,h,r){
-  var tl,tr,br,bl;
-  if(Array.isArray(r)){
-    tl=r[0]||0; tr=r[1]||0; br=r[2]||0; bl=r[3]||0;
-  } else {
-    tl=tr=br=bl=r||0;
-  }
-  ctx.beginPath();
-  ctx.moveTo(x+tl,y);
-  ctx.lineTo(x+w-tr,y);
-  ctx.quadraticCurveTo(x+w,y,x+w,y+tr);
-  ctx.lineTo(x+w,y+h-br);
-  ctx.quadraticCurveTo(x+w,y+h,x+w-br,y+h);
-  ctx.lineTo(x+bl,y+h);
-  ctx.quadraticCurveTo(x,y+h,x,y+h-bl);
-  ctx.lineTo(x,y+tl);
-  ctx.quadraticCurveTo(x,y,x+tl,y);
-  ctx.closePath();
-}
-
-
-let W=0, H=0;
-
-function resize(){
-  W = CV.width  = window.innerWidth;
-  H = CV.height = window.innerHeight;
-  recalcPhysics();
-  checkRotate();
-}
-window.addEventListener('resize', resize);
-window.addEventListener('orientationchange', ()=>setTimeout(resize,250));
-
-function checkRotate(){
-  const mob = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  document.getElementById('rotate').style.display =
-    (mob && window.innerHeight > window.innerWidth) ? 'flex' : 'none';
-}
-
-// ══════════════════════════════════════════
-// ФИЗИКА
-// ══════════════════════════════════════════
-let GRAV, JUMP, SPEED, GAP, PIPE_INT;
-function recalcPhysics(){
-  const sc = Math.min(W, H*16/9) / 800;
-  GRAV     = 0.20 * sc;
-  JUMP     = -5.5 * sc;
-  SPEED    = 3.0  * sc;
-  GAP      = Math.max(150, 230*(H/450));
-  PIPE_INT = Math.round(110/sc);
-}
-
-// ══════════════════════════════════════════
-// СОСТОЯНИЕ
-// STATE: 'menu' | 'countdown' | 'ready' | 'playing' | 'over'
-// ══════════════════════════════════════════
-let STATE = 'menu';
-let birdIdx = 0;
-let playerName = 'ИГРОК';
-
-let bird, pipes, trails, particles;
-let score, frame, combo, comboTimer;
-let cycleDayNight = 0.55, lightFlash = 0;
-let stars, clouds, mountains;
-
-// Отсчёт — хранится в этих переменных
-let cdNum = 0;       // текущее число 3/2/1
-let cdTimer = null;  // handle setTimeout
-
-// Мигание "tap to fly"
-let tapBlink = 0;
-
-// Уровень сложности
-let level = 1;
-let lastLevelScore = 0; // счёт при последнем повышении уровня
-
-// ══════════════════════════════════════════
-// ИНИЦИАЛИЗАЦИЯ МИРА
-// ══════════════════════════════════════════
-function initWorld(){
-  recalcPhysics();
-  bird = {x:W*0.22, y:H/2, v:0, wing:0};
-  pipes=[];trails=[];particles=[];
-  score=0; frame=0; combo=0; comboTimer=0; level=1; lastLevelScore=0;
-  lightFlash=0; tapBlink=0;
-
-  document.getElementById('hud-score').textContent = '0';
-  document.getElementById('hud-combo').style.opacity = '0';
-  document.getElementById('speedbar-fill').style.width = '0%';
-
-  stars = Array.from({length:90},()=>({
-    x:Math.random()*W, y:Math.random()*H*.65,
-    r:.5+Math.random()*1.8, tw:Math.random()*Math.PI*2
-  }));
-  clouds = Array.from({length:7},()=>({
-    x:Math.random()*W, y:30+Math.random()*H*.38,
-    s:.5+Math.random()*.9, sp:.25+Math.random()*.35
-  }));
-  mountains = [0,1,2].map(li=>{
-    const cnt=10+li*4;
-    return {sp:(li+1)*.35, li,
-      pts:Array.from({length:cnt+1},(_,i)=>({
-        x:(W/cnt)*i,
-        y:H*(.52+li*.13)-Math.random()*H*(.18-li*.04)
-      }))
-    };
-  });
-}
-
-// ══════════════════════════════════════════
-// ВСПОМОГАТЕЛЬНЫЕ DOM-ФУНКЦИИ
-// ══════════════════════════════════════════
-function showEl(id){ document.getElementById(id).style.display='flex'; }
-function hideEl(id){ document.getElementById(id).style.display='none'; }
-
-// ══════════════════════════════════════════
-// КНОПКИ МЕНЮ
-// ══════════════════════════════════════════
-function clickPlay(){
-  const nm = document.getElementById('inp-name').value.trim();
-  playerName = nm || 'ИГРОК';
-  beginCountdown();
-}
-function clickAnon(){
-  playerName = 'ИГРОК';
-  beginCountdown();
-}
-
-// ══════════════════════════════════════════
-// ОТСЧЁТ 3-2-1 (рисуется НА CANVAS, не HTML)
-// ══════════════════════════════════════════
-function beginCountdown(){
-  if(cdTimer) clearTimeout(cdTimer);
-  hideEl('menu');
-  hideEl('gameover');
-  hideEl('hud');
-  document.getElementById('speedbar').style.display = 'none';
-  initWorld();
-  cdNum = 3;
-  STATE = 'countdown';
-  scheduleNextTick();
-}
-
-function scheduleNextTick(){
-  cdTimer = setTimeout(cdTick, 1000);
-}
-
-function cdTick(){
-  cdNum--;
-  if(cdNum > 0){
-    scheduleNextTick();
-  } else {
-    // Отсчёт кончился → STATE = ready
-    cdTimer = null;
-    STATE = 'ready';
-    tapBlink = 0;
-  }
-}
-
-// ══════════════════════════════════════════
-// УПРАВЛЕНИЕ
-// Тапы/клики/пробел — ТОЛЬКО на canvas
-// Никаких HTML-оверлеев между пользователем и canvas в режиме countdown/ready/playing
-// ══════════════════════════════════════════
-function onTap(e){
-  if(e) e.preventDefault();
-
-  if(STATE === 'countdown'){
-    // Нажатие во время отсчёта — ускоряем, переходим сразу в ready
-    if(cdTimer){ clearTimeout(cdTimer); cdTimer=null; }
-    STATE = 'ready';
-    tapBlink = 0;
-    return;
-  }
-
-  if(STATE === 'ready'){
-    // Первый тап — старт игры
-    STATE = 'playing';
-    frame = 0;
-    showEl('hud');
-    document.getElementById('speedbar').style.display = 'block';
-    doFlap();
-    return;
-  }
-
-  if(STATE === 'playing'){
-    doFlap();
-  }
-}
-
-function doFlap(){
-  bird.v = JUMP;
-  const b = BIRDS[birdIdx];
-  for(let i=0;i<5;i++) particles.push({
-    x:bird.x-12, y:bird.y+4,
-    vx:-Math.random()*2.5, vy:(Math.random()-.5)*3,
-    r:2+Math.random()*2, col:b.trail, life:1
-  });
-}
-
-// Слушаем ТОЛЬКО canvas — никаких других элементов поверх него во время игры
-CV.addEventListener('touchstart', onTap, {passive:false});
-CV.addEventListener('mousedown',  onTap);
-window.addEventListener('keydown', e=>{
-  if(e.code==='Space'||e.code==='ArrowUp'){ e.preventDefault(); onTap(null); }
-});
-
-// ══════════════════════════════════════════
-// КНОПКИ GAME OVER
-// ══════════════════════════════════════════
-function clickAgain(){
-  beginCountdown();
-}
-function clickMenu(){
-  hideEl('gameover');
-  initWorld();
-  STATE = 'menu';
-  showEl('menu');
-}
-
-// ══════════════════════════════════════════
-// ПРОГРЕССИЯ СЛОЖНОСТИ
-// Каждые 10 очков — новый уровень (макс 10)
-// ══════════════════════════════════════════
-function getDifficulty(){
-  // level 1..10
-  const lvl = Math.min(20, 1 + Math.floor(score / 5));
-  const t = (lvl-1)/19; // 0..1
-
-  return {
-    lvl,
-    // Скорость: от базовой до +90%
-    spd:  SPEED * (1 + t * 0.9),
-    // Зазор между трубами: от GAP до GAP*0.52 (почти вдвое уже)
-    gap:  GAP * (1 - t * 0.48),
-    // Интервал между трубами: чаще появляются
-    interval: Math.round(PIPE_INT * (1 - t * 0.35)),
-    // Ширина труб: чуть толще
-    pw: Math.max(60, Math.min(95, W*.09) * (1 + t * 0.25)),
-  };
-}
-
-// ══════════════════════════════════════════
-// ИГРОВАЯ ЛОГИКА
-// ══════════════════════════════════════════
-function updateGame(){
-  bird.v += GRAV;
-  bird.y += bird.v;
-  bird.wing += .15;
-
-  const diff = getDifficulty();
-
-  // Повышение уровня — показываем вспышку
-  if(diff.lvl > level){
-    level = diff.lvl;
-    lastLevelScore = score;
-    // Световая вспышка
-    lightFlash = 6;
-  }
-
-  // Трубы — первая через interval кадров после старта
-  if(frame > 0 && frame % diff.interval === 0){
-    const minH = H*.1;
-    const maxH = H - diff.gap - H*.1;
-    const th = minH + Math.random() * Math.max(0, maxH - minH);
-    pipes.push({x:W+10, w:diff.pw, h:th,             top:true,  passed:false});
-    pipes.push({x:W+10, w:diff.pw, h:H-th-diff.gap,  top:false});
-  }
-
-  if(comboTimer>0) comboTimer--;
-  else if(combo>0){ combo=0; updateComboUI(); }
-
-  const br = Math.min(W,H)/520*9;
-
-  for(let i=pipes.length-1; i>=0; i--){
-    const p = pipes[i];
-    p.x -= diff.spd;
-
-    const py = p.top ? 0 : H-p.h;
-    if(bird.x+br > p.x && bird.x-br < p.x+p.w &&
+    // Ghost — проходим сквозь
+    if(activeGhost>0){
+      // рисуем трубу полупрозрачно — не коллизия
+    } else if(bird.x+br > p.x && bird.x-br < p.x+p.w &&
        bird.y+br > py  && bird.y-br < py+p.h){
-      triggerDeath(); return;
-    }
-
-    if(!p.passed && p.top && p.x+p.w < bird.x){
-      p.passed=true; score++;
-      combo++; comboTimer=110;
-      document.getElementById('hud-score').textContent = score;
-      updateComboUI();
-      spawnPts();
-      // Спидбар = прогресс внутри текущего уровня (0..100%)
-      const progressInLevel = ((score % 5) / 5) * 100;
-      document.getElementById('speedbar-fill').style.width = progressInLevel+'%';
-    }
-    if(p.x < -p.w-10) pipes.splice(i,1);
-  }
-
-  if(bird.y > H+20 || bird.y < -20) triggerDeath();
-
-  if(Math.random()<.0012 && lightFlash<=0) lightFlash=10+Math.floor(Math.random()*8);
-  if(lightFlash>0) lightFlash--;
-
-  frame++;
-}
-
-function updateComboUI(){
-  const el = document.getElementById('hud-combo');
-  if(combo>=3){ el.style.opacity='1'; el.textContent='×'+combo+' КОМБО!'; }
-  else el.style.opacity='0';
-}
-
-function spawnPts(){
-  const cols=['#f1c40f','#e67e22','#2ecc71','#fff'];
-  for(let i=0;i<7;i++) particles.push({
-    x:bird.x, y:bird.y,
-    vx:(Math.random()-.5)*5, vy:-Math.random()*4-1,
-    r:3+Math.random()*4, col:cols[i%4], life:1
-  });
-}
-
-function updateIdle(){
-  bird.y = H/2 + Math.sin(frame*.05)*16;
-  bird.v = Math.cos(frame*.05)*.8;
-  bird.wing += .09;
-  frame++;
-}
-
-// ══════════════════════════════════════════
-// СМЕРТЬ
-// ══════════════════════════════════════════
-function triggerDeath(){
-  if(STATE==='over') return;
-  STATE = 'over';
-  hideEl('hud');
-  document.getElementById('speedbar').style.display='none';
-
-  for(let i=0;i<24;i++) particles.push({
-    x:bird.x, y:bird.y,
-    vx:(Math.random()-.5)*11, vy:(Math.random()-.5)*11,
-    r:4+Math.random()*8, col:['#e74c3c','#f1c40f','#fff'][i%3], life:1
-  });
-
-  const rec = saveScore(playerName, score, BIRDS[birdIdx].id);
-  setTimeout(()=>showGameOver(rec), 800);
-}
-
-function showGameOver(rec){
-  document.getElementById('go-score').textContent = score+' ОЧКОВ';
-  document.getElementById('go-best').textContent =
-    rec.isNew ? '🎉 НОВЫЙ РЕКОРД!' : ('Твой рекорд: '+rec.best);
-  renderLB('lb-rows');
-  showEl('gameover');
-}
-
-// ══════════════════════════════════════════
-// РЕЙТИНГ
-// ══════════════════════════════════════════
-const LB_KEY = 'buria_orlov_v1';
-function getLB(){ try{return JSON.parse(localStorage.getItem(LB_KEY)||'[]');}catch(e){return[];} }
-
-function saveScore(name, s, birdId){
-  let lb = getLB();
-  const ei = lb.findIndex(e=>e.name.toLowerCase()===name.toLowerCase());
-  let prev=0, isNew=false;
-  if(ei>=0){ prev=lb[ei].s; if(s>prev){lb[ei]={name,s,birdId};isNew=true;} }
-  else{ lb.push({name,s,birdId}); isNew=true; }
-  lb.sort((a,b)=>b.s-a.s);
-  lb=lb.slice(0,20);
-  localStorage.setItem(LB_KEY, JSON.stringify(lb));
-  return {best:Math.max(s,prev), isNew};
-}
-
-function renderLB(cid){
-  const lb = getLB();
-  const el = document.getElementById(cid);
-  const ranks = ['🥇','🥈','🥉','4.','5.','6.','7.','8.'];
-  const me = playerName.toLowerCase();
-  if(!lb.length){
-    el.innerHTML='<div class="lb-row" style="opacity:.4;justify-content:center">Нет рекордов</div>';
-    return;
-  }
-  el.innerHTML = lb.slice(0,6).map((e,i)=>{
-    const isMe = e.name.toLowerCase()===me;
-    const bd = BIRDS.find(b=>b.id===e.birdId)||BIRDS[0];
-    return `<div class="lb-row${isMe?' lb-me':''}">
-      <span class="lb-rank">${ranks[i]||i+1+'.'}</span>
-      <span class="lb-icon">${bd.emoji}</span>
-      <span class="lb-name${isMe?' me':''}">${esc(e.name)}</span>
-      <span class="lb-pts">${e.s}</span>
-    </div>`;
-  }).join('');
-}
-
-function esc(s){
-  return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
-}
-
-// ══════════════════════════════════════════
-// РИСОВАНИЕ ФОНА
-// ══════════════════════════════════════════
-function lp3(a,b,t){ return a.map((v,i)=>Math.round(v+(b[i]-v)*Math.max(0,Math.min(1,t)))); }
-
-function drawSky(){
-  const N=[[8,6,22],[12,10,35]], D=[[60,20,60],[100,30,80]],
-        Y=[[28,95,185],[95,172,245]], S=[[75,28,18],[170,75,28]];
-  let top,bot; const c=cycleDayNight;
-  if(c<.25){const t=c/.25;       top=lp3(N[0],D[0],t);bot=lp3(N[1],D[1],t);}
-  else if(c<.5){const t=(c-.25)/.25; top=lp3(D[0],Y[0],t);bot=lp3(D[1],Y[1],t);}
-  else if(c<.75){const t=(c-.5)/.25;  top=lp3(Y[0],S[0],t);bot=lp3(Y[1],S[1],t);}
-  else{const t=(c-.75)/.25;           top=lp3(S[0],N[0],t);bot=lp3(S[1],N[1],t);}
-  if(lightFlash>0){const f=lightFlash/12;top=lp3(top,[230,235,255],f*.8);bot=lp3(bot,[190,210,255],f*.6);}
-  const g=CX.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,`rgb(${top})`); g.addColorStop(1,`rgb(${bot})`);
-  CX.fillStyle=g; CX.fillRect(0,0,W,H);
-}
-
-function drawStars(){
-  const al=cycleDayNight<.3?1:cycleDayNight<.5?1-(cycleDayNight-.3)/.2:0;
-  if(al<=0) return;
-  stars.forEach(s=>{
-    s.tw+=.035;
-    CX.globalAlpha=al*(.4+Math.sin(s.tw)*.6);
-    CX.fillStyle='#fff';
-    if(s.r>0){CX.beginPath(); CX.arc(s.x,s.y,s.r,0,Math.PI*2); CX.fill();}
-  });
-  CX.globalAlpha=1;
-}
-
-function drawCelestial(){
-  const sx=W*.82, c=cycleDayNight;
-  const sy=H*.13+Math.sin(c*Math.PI*2)*H*.08;
-  if(c>.18&&c<.82){
-    const op=c<.28?(c-.18)/.1:c>.72?1-(c-.72)/.1:1;
-    CX.globalAlpha=op;
-    const sg=CX.createRadialGradient(sx,sy,0,sx,sy,55);
-    sg.addColorStop(0,'rgba(255,255,195,1)'); sg.addColorStop(.45,'rgba(255,215,45,.75)'); sg.addColorStop(1,'rgba(255,140,0,0)');
-    CX.fillStyle=sg; CX.beginPath(); CX.arc(sx,sy,55,0,Math.PI*2); CX.fill();
-    CX.globalAlpha=1;
-  } else {
-    const ma=c<.1?1-c/.1:c>.9?(c-.9)/.1:1;
-    CX.globalAlpha=Math.max(0,ma);
-    CX.fillStyle='#ddeeff'; CX.beginPath(); CX.arc(sx,sy,20,0,Math.PI*2); CX.fill();
-    CX.fillStyle='rgba(140,170,210,.55)'; CX.beginPath(); CX.arc(sx+7,sy-4,16,0,Math.PI*2); CX.fill();
-    CX.globalAlpha=1;
-  }
-}
-
-function drawMountains(){
-  const c=cycleDayNight;
-  const cols=[
-    c<.5?lp3([18,28,55],[75,55,75],c*2):lp3([75,55,75],[38,18,28],(c-.5)*2),
-    c<.5?lp3([13,22,45],[55,38,55],c*2):lp3([55,38,55],[28,13,22],(c-.5)*2),
-    c<.5?lp3([8,16,35],[38,22,38],c*2) :lp3([38,22,38],[18,8,14],(c-.5)*2),
-  ];
-  mountains.forEach((m,li)=>{
-    const spd=m.sp*(SPEED/3)*.14;
-    m.pts.forEach(p=>p.x-=spd);
-    if(m.pts[0].x<-W/m.pts.length*2){
-      const last=m.pts[m.pts.length-1];
-      m.pts.shift();
-      m.pts.push({x:last.x+W/10,y:H*(.52+li*.13)-Math.random()*H*(.18-li*.04)});
-    }
-    CX.fillStyle=`rgb(${cols[li]})`;
-    CX.beginPath(); CX.moveTo(0,H);
-    m.pts.forEach(p=>CX.lineTo(p.x,p.y));
-    CX.lineTo(W,H); CX.closePath(); CX.fill();
-    if(li===0){
-      CX.fillStyle=`rgba(255,255,255,${.12+c*.08})`;
-      m.pts.forEach((p,i)=>{
-        if(i===0||i===m.pts.length-1)return;
-        CX.beginPath(); CX.moveTo(p.x-14,p.y+16); CX.lineTo(p.x,p.y); CX.lineTo(p.x+14,p.y+16); CX.closePath(); CX.fill();
-      });
-    }
-  });
-}
-
-function drawClouds(){
-  clouds.forEach(cl=>{
-    cl.x-=cl.sp*(SPEED/3);
-    if(cl.x<-180){cl.x=W+130;cl.y=30+Math.random()*H*.35;}
-    CX.globalAlpha=.06+cycleDayNight*.11; CX.fillStyle='#fff';
-    var cr1=Math.max(0,46*cl.s),cr2=Math.max(0,32*cl.s);
-    [-1,0,1].forEach(d=>{ CX.beginPath(); CX.arc(cl.x+d*38*cl.s,cl.y,cr1,0,Math.PI*2); CX.fill(); });
-    CX.beginPath(); CX.arc(cl.x,cl.y-22*cl.s,cr2,0,Math.PI*2); CX.fill();
-    CX.globalAlpha=1;
-  });
-}
-
-function drawPipes(){
-  const night=cycleDayNight<.25||cycleDayNight>.75;
-  pipes.forEach(p=>{
-    const py=p.top?0:H-p.h;
-    const rg=CX.createLinearGradient(p.x,0,p.x+p.w,0);
-    if(night){rg.addColorStop(0,'#0b1824');rg.addColorStop(.5,'#162433');rg.addColorStop(1,'#081018');}
-    else{rg.addColorStop(0,'#18182a');rg.addColorStop(.5,'#282840');rg.addColorStop(1,'#101020');}
-    CX.fillStyle=rg;
-    rrect(CX,p.x,py,p.w,p.h,p.top?[0,0,10,10]:[10,10,0,0]); CX.fill();
-    const nc=night?'#3498db':'#7c4dff';
-    CX.strokeStyle=nc; CX.lineWidth=2; CX.shadowBlur=night?14:6; CX.shadowColor=nc;
-    rrect(CX,p.x,py,p.w,p.h,p.top?[0,0,10,10]:[10,10,0,0]); CX.stroke();
-    CX.shadowBlur=0;
-    CX.fillStyle=nc; CX.globalAlpha=.65;
-    if(p.top) CX.fillRect(p.x,p.h-5,p.w,5); else CX.fillRect(p.x,H-p.h,p.w,5);
-    CX.globalAlpha=1;
-  });
-}
-
-// ══════════════════════════════════════════
-// РИСОВАНИЕ ОТСЧЁТА И "TAP" НА CANVAS
-// ══════════════════════════════════════════
-function drawOverlayCanvas(){
-  const cx=W/2, cy=H/2;
-
-  if(STATE==='countdown'){
-    // Полупрозрачный фон
-    CX.fillStyle='rgba(0,0,0,.45)';
-    CX.fillRect(0,0,W,H);
-    // Большое число
-    const sz=Math.min(W,H)*.28;
-    CX.font=`900 ${sz}px Arial, sans-serif`;
-    CX.textAlign='center';
-    CX.textBaseline='middle';
-    // Тень-свечение
-    CX.shadowBlur=60; CX.shadowColor='rgba(241,196,15,.9)';
-    CX.fillStyle='#f1c40f';
-    CX.fillText(String(cdNum), cx, cy);
-    CX.shadowBlur=0;
-    // Подпись птицы снизу
-    const bdef=BIRDS[birdIdx];
-    CX.font=`700 ${Math.min(W,H)*.04}px Arial, sans-serif`;
-    CX.fillStyle='rgba(255,255,255,.55)';
-    CX.fillText(bdef.emoji+' '+bdef.name, cx, cy+sz*.72);
-    // Маленький текст «нажми чтобы пропустить»
-    CX.font=`400 ${Math.min(W,H)*.025}px Arial, sans-serif`;
-    CX.fillStyle='rgba(255,255,255,.25)';
-    CX.fillText('нажми чтобы пропустить', cx, cy+sz*.72+Math.min(W,H)*.055);
-    CX.textAlign='left'; CX.textBaseline='alphabetic';
-    return;
-  }
-
-  if(STATE==='ready'){
-    // Мигающая подсказка
-    tapBlink += .05;
-    const alpha = .45+Math.sin(tapBlink)*0.55;
-    const fontSize = Math.min(W,H)*.055;
-    const text = '👆  НАЖМИ ЧТОБЫ ЛЕТЕТЬ';
-    CX.font=`700 ${fontSize}px Arial, sans-serif`;
-    CX.textAlign='center';
-    CX.textBaseline='middle';
-    // Плашка
-    const tw=CX.measureText(text).width;
-    const ph=fontSize*1.5, pw2=tw+fontSize*1.2;
-    const bx=cx-pw2/2, by=cy-ph/2;
-    CX.fillStyle=`rgba(0,0,0,${alpha*.65})`;
-    rrect(CX,bx,by,pw2,ph,ph/2); CX.fill();
-    CX.strokeStyle=`rgba(255,255,255,${alpha*.4})`;
-    CX.lineWidth=1.5;
-    rrect(CX,bx,by,pw2,ph,ph/2); CX.stroke();
-    CX.globalAlpha=alpha;
-    CX.fillStyle='#fff';
-    CX.shadowBlur=18; CX.shadowColor='rgba(255,255,255,.6)';
-    CX.fillText(text, cx, cy);
-    CX.shadowBlur=0; CX.globalAlpha=1;
-    // Имя птицы под надписью
-    const bdef=BIRDS[birdIdx];
-    CX.font=`600 ${fontSize*.55}px Arial, sans-serif`;
-    CX.fillStyle='rgba(255,255,255,.4)';
-    CX.fillText(bdef.emoji+' '+bdef.name, cx, cy+fontSize*1.3);
-    CX.textAlign='left'; CX.textBaseline='alphabetic';
-  }
-}
-
-// ══════════════════════════════════════════
-// РИСОВАНИЕ ПТИЦЫ
-// ══════════════════════════════════════════
-function drawBird(){
-  const b=BIRDS[birdIdx];
-  const sc=Math.min(W,H)/520;
-  CX.save();
-  CX.translate(bird.x,bird.y);
-  const angle=Math.min(Math.PI/5,Math.max(-Math.PI/4,bird.v*.07));
-  CX.rotate(angle);
-  if(b.aura){CX.shadowBlur=18;CX.shadowColor=b.aura;}
-  if(combo>=3){CX.shadowBlur=28;CX.shadowColor='#f1c40f';}
-  CX.scale(sc,sc);
-  const wf=Math.sin(bird.wing)*22;
-  CX.fillStyle=b.wing;
-  CX.beginPath(); CX.moveTo(-18,2); CX.quadraticCurveTo(0,-wf-24,18,2); CX.fill();
-  CX.strokeStyle=b.body; CX.lineWidth=1; CX.globalAlpha=.4;
-  for(let f=1;f<=3;f++){
-    CX.beginPath(); CX.moveTo(-18+f*9,2);
-    CX.quadraticCurveTo(-14+f*9,-wf*.5-f*3,-14+f*9,2); CX.stroke();
-  }
-  CX.globalAlpha=1;
-  CX.fillStyle=b.body;
-  CX.beginPath(); CX.ellipse(0,0,25,10,0,0,Math.PI*2); CX.fill();
-  CX.fillStyle=b.head; CX.shadowBlur=0;
-  CX.beginPath(); CX.arc(17,-4,10,0,Math.PI*2); CX.fill();
-  CX.fillStyle=b.beak;
-  CX.beginPath(); CX.moveTo(24,-4); CX.lineTo(36,-1); CX.lineTo(24,2); CX.fill();
-  CX.fillStyle=b.eye;
-  CX.beginPath(); CX.arc(20,-5,3,0,Math.PI*2); CX.fill();
-  CX.fillStyle='#fff'; CX.beginPath(); CX.arc(21,-5.8,1.2,0,Math.PI*2); CX.fill();
-  CX.fillStyle=b.wing;
-  CX.beginPath(); CX.moveTo(-23,0); CX.lineTo(-35,-7); CX.lineTo(-27,3);  CX.fill();
-  CX.beginPath(); CX.moveTo(-23,2); CX.lineTo(-33,10); CX.lineTo(-26,5);  CX.fill();
-  CX.beginPath(); CX.moveTo(-23,1); CX.lineTo(-36,2);  CX.lineTo(-27,4);  CX.fill();
-  if(b.id==='phoenix'){
-    CX.globalAlpha=.7;
-    ['#ff6b35','#f1c40f','#e74c3c'].forEach((col,ci)=>{
-      CX.fillStyle=col;
-      CX.beginPath();
-      CX.moveTo(-23+ci*3,ci*2);
-      CX.quadraticCurveTo(-30+ci*2,-9-Math.sin(frame*.14+ci)*7,-35+ci*3,-4+ci);
-      CX.quadraticCurveTo(-28+ci,-2+Math.cos(frame*.14+ci)*4,-23+ci*3,ci*2);
-      CX.fill();
-    });
-    CX.globalAlpha=1;
-  }
-  CX.restore();
-  trails.push({x:bird.x-10,y:bird.y,r:5,life:1});
-  if(trails.length>20) trails.shift();
-  trails.forEach(t=>t.life-=.06);
-  trails=trails.filter(t=>t.life>0);
-  trails.forEach(t=>{
-    CX.globalAlpha=t.life*.45; CX.fillStyle=b.trail;
-    var tr=t.r*t.life; if(tr>0){CX.beginPath(); CX.arc(t.x,t.y,tr,0,Math.PI*2); CX.fill();}
-  });
-  CX.globalAlpha=1;
-}
-
-function drawParticles(){
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    p.x+=p.vx; p.y+=p.vy; p.vy+=.08;
-    p.life-=.03; p.r*=.96;
-    if(p.life<=0){particles.splice(i,1);continue;}
-    CX.globalAlpha=p.life; CX.fillStyle=p.col;
-    if(p.r>0){CX.beginPath(); CX.arc(p.x,p.y,p.r,0,Math.PI*2); CX.fill();}
-  }
-  CX.globalAlpha=1;
-}
-
-// ══════════════════════════════════════════
-// ПРЕДПРОСМОТР ПТИЦЫ В МЕНЮ
-// ══════════════════════════════════════════
-function buildSelector(){
-  const grid=document.getElementById('sel-grid');
-  grid.innerHTML='';
-  BIRDS.forEach((b,i)=>{
-    const div=document.createElement('div');
-    div.className='sel-card'+(i===0?' active':'');
-    const cv=document.createElement('canvas'); cv.width=54; cv.height=54;
-    const nm=document.createElement('div'); nm.className='cname'; nm.textContent=b.name;
-    const tg=document.createElement('div'); tg.className='ctag';  tg.textContent=b.tag;
-    div.append(cv,nm,tg);
-    div.onclick=()=>{
-      document.querySelectorAll('.sel-card').forEach(c=>c.classList.remove('active'));
-      div.classList.add('active');
-      birdIdx=i;
-    };
-    grid.appendChild(div);
-    drawPreview(b,cv);
-  });
-}
-
-function drawPreview(b,cv){
-  const c=cv.getContext('2d');
-  c.save(); c.translate(27,27);
-  c.fillStyle=b.wing; c.beginPath(); c.moveTo(-14,0); c.quadraticCurveTo(0,-20,14,0); c.fill();
-  c.fillStyle=b.body; c.beginPath(); c.ellipse(0,0,20,8,0,0,Math.PI*2); c.fill();
-  c.fillStyle=b.head; c.beginPath(); c.arc(16,-4,9,0,Math.PI*2); c.fill();
-  c.fillStyle=b.beak; c.beginPath(); c.moveTo(22,-4); c.lineTo(32,-1); c.lineTo(22,2); c.fill();
-  c.fillStyle=b.eye;  c.beginPath(); c.arc(19,-5,2.5,0,Math.PI*2); c.fill();
-  c.fillStyle='#fff'; c.beginPath(); c.arc(20,-5.5,1,0,Math.PI*2); c.fill();
-  c.fillStyle=b.wing;
-  c.beginPath(); c.moveTo(-20,0); c.lineTo(-30,-5); c.lineTo(-24,2); c.fill();
-  c.beginPath(); c.moveTo(-20,2); c.lineTo(-28,8);  c.lineTo(-23,4); c.fill();
-  if(b.aura){
-    c.shadowBlur=12; c.shadowColor=b.aura;
-    c.strokeStyle=b.aura; c.lineWidth=1.5;
-    c.beginPath(); c.ellipse(0,0,21,9,0,0,Math.PI*2); c.stroke();
-    c.shadowBlur=0;
-  }
-  c.restore();
-}
-
-
-// ══════════════════════════════════════════
-// УРОВЕНЬ И LEVEL-UP НА CANVAS
-// ══════════════════════════════════════════
-function drawLevelHud(){
-  if(STATE!=='playing' && STATE!=='over') return;
-
-  const diff = getDifficulty();
-  const fs = Math.min(W,H)*.028;
-
-  // Уровень — правый верхний угол (под комбо)
-  CX.save();
-  CX.textAlign='right';
-  CX.textBaseline='top';
-  CX.font='700 '+fs+'px Arial,sans-serif';
-
-  // Цвет уровня: зелёный→жёлтый→красный
-  const t=(level-1)/9;
-  const r=Math.round(80+t*175), g=Math.round(220-t*120), b=80;
-  const col='rgb('+r+','+g+','+b+')';
-
-  CX.fillStyle='rgba(0,0,0,.4)';
-  CX.fillRect(W-fs*5.5, fs*.5, fs*5, fs*1.6);
-
-  CX.fillStyle=col;
-  CX.shadowBlur=8; CX.shadowColor=col;
-  CX.fillText('УР. '+level+' / 20', W-fs*.6, fs*.7);
-  CX.shadowBlur=0;
-  CX.restore();
-}
-
-// ══════════════════════════════════════════
-// ГЛАВНЫЙ ЦИКЛ
-// ══════════════════════════════════════════
-function loop(){
-  cycleDayNight=(cycleDayNight+.00035)%1;
-  CX.clearRect(0,0,W,H);
-
-  // Фон рисуется всегда (красиво за меню тоже)
-  drawSky();
-  drawStars();
-  drawCelestial();
-  drawMountains();
-  drawClouds();
-
-  // Трубы — только в игре и после смерти
-  if(STATE==='playing'||STATE==='over') drawPipes();
-
-  // Птица + частицы — всегда кроме меню
-  if(STATE!=='menu'){
-    if(STATE==='countdown'||STATE==='ready') updateIdle();
-    if(STATE==='playing') updateGame();
-    drawBird();
-    drawParticles();
-    drawLevelHud();
-    // Отсчёт/tap — рисуем НА canvas поверх всего
-    drawOverlayCanvas();
-  }
-
-  requestAnimationFrame(loop);
-}
-
-// ══════════════════════════════════════════
-// ЗАПУСК
-// ══════════════════════════════════════════
-resize();
-buildSelector();
-initWorld();
-loop(); // ← запускаем цикл сразу
-</script>
-</body>
-</html>
-color: white; margin-bottom: 20px; text-align: center; font-size: 18px; outline: none; width: 200px; }
-        input:focus { border-color: var(--gold); }
-
-        .bird-selector { display: flex; gap: 15px; margin-bottom: 30px; }
-        .card { background: rgba(30, 41, 59, 0.7); border: 2px solid rgba(255,255,255,0.1); padding: 15px; border-radius: 20px; cursor: pointer; transition: 0.3s; width: 80px; text-align: center; }
-        .card:hover { border-color: var(--gold); transform: translateY(-5px); }
-        .card span { font-size: 40px; display: block; }
-
-        .leaderboard { background: rgba(0,0,0,0.4); padding: 15px; border-radius: 15px; width: 300px; border: 1px solid rgba(255,255,255,0.1); }
-        .lb-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
-        .lb-row b { color: var(--gold); }
-
-        #score-ui { position: fixed; top: 40px; width: 100%; text-align: center; font-size: 60px; font-weight: 900; z-index: 100; pointer-events: none; text-shadow: 0 4px 20px #000; }
-        #timer { position: fixed; top: 35%; width: 100%; text-align: center; font-size: 80px; color: var(--gold); z-index: 150; font-weight: 900; }
-
-        .btn-box { display: flex; gap: 15px; margin-top: 30px; }
-        .btn { padding: 15px 30px; border: none; border-radius: 50px; font-weight: bold; cursor: pointer; text-transform: uppercase; }
-        .btn-res { background: #10b981; color: white; }
-        .btn-menu { background: #334155; color: white; }
-    </style>
-</head>
-<body>
-
-    <div id="score-ui">0</div>
-    <div id="timer"></div>
-
-    <div id="menu" class="overlay">
-        <h1>EAGLE STORM</h1>
-        <input type="text" id="player-name" placeholder="Твое имя" maxlength="12">
-        <div class="bird-selector">
-            <div class="card" onclick="selectBird('#3e2723', '#fff')"><span>🦅</span>ОРЕЛ</div>
-            <div class="card" onclick="selectBird('#e67e22', '#f1c40f')"><span>🔥</span>ФЕНИКС</div>
-            <div class="card" onclick="selectBird('#1e293b', '#6366f1')"><span>🐦</span>ВОРОН</div>
-        </div>
-        <div class="leaderboard" id="main-lb"></div>
-    </div>
-
-    <div id="game-over" class="overlay" style="display:none">
-        <h2 style="color:#ef4444">СТОЛКНОВЕНИЕ</h2>
-        <div id="last-score" style="margin: 10px 0; font-size: 20px;">Счет: 0</div>
-        <div class="leaderboard" id="death-lb"></div>
-        <div class="btn-box">
-            <button class="btn btn-res" onclick="restart()">РЕСТАРТ</button>
-            <button class="btn btn-menu" onclick="location.reload()">МЕНЮ</button>
-        </div>
-    </div>
-
-    <canvas id="game"></canvas>
-
-<script>
-const canvas = document.getElementById('game');
-const ctx = canvas.getContext('2d');
-const timerUI = document.getElementById('timer');
-const scoreUI = document.getElementById('score-ui');
-const nameInput = document.getElementById('player-name');
-
-let w, h, bird, pipes = [], clouds = [], stars = [], score = 0, frame = 0;
-let gameStarted = false, isOver = false, birdSelected = false;
-let birdBody = '#3e2723', birdHead = '#fff';
-let cycle = 0; // 0-1: день, закат, ночь, рассвет
-let lightning = 0;
-
-const GRAVITY = 0.17;
-const JUMP = -4.8;
-const SPEED = 3.5;
-
-function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-}
-window.onresize = resize;
-resize();
-
-function initGame() {
-    bird = { x: w * 0.25, y: h / 2, v: 0, a: 0, wing: 0 };
-    pipes = [];
-    clouds = [];
-    stars = [];
-    for(let i=0; i<80; i++) stars.push({x: Math.random()*w, y: Math.random()*h, s: Math.random()});
-    for(let i=0; i<6; i++) clouds.push({x: Math.random()*w, y: Math.random()*h*0.5, s: 0.4 + Math.random()});
-}
-initGame();
-
-function selectBird(body, head) {
-    if(!nameInput.value.trim()) { alert("Введи имя!"); return; }
-    birdBody = body; birdHead = head;
-    birdSelected = true;
-    document.getElementById('menu').style.display = 'none';
-    scoreUI.style.display = 'block';
-    
-    let count = 3;
-    timerUI.innerText = "ГОТОВЬСЯ...";
-    let t = setInterval(() => {
-        if(count <= 0) {
-            clearInterval(t);
-            timerUI.innerText = "В ПОЛЕТ!";
-            setTimeout(() => timerUI.innerText = "", 800);
-            gameStarted = true;
-        } else {
-            timerUI.innerText = count;
-            count--;
+      if(activeShield>0){
+        // Щит поглощает удар
+        activeShield=0;
+        lightFlash=8;
+        shakeDur=20; shakeAmp=6;
+        pipes.splice(i,1); continue;
+      }
+      // Феникс: заряды пробития
+      if(phoenixCharges > 0){
+        phoenixCharges--;
+        // Взрываем только эту трубу и её пару (top+bottom)
+        const hitX = p.x;
+        pipes.forEach(pp=>{ if(Math.abs(pp.x - hitX) < 5) pp._destroy=true; });
+        for(let pi=pipes.length-1;pi>=0;pi--){
+          if(pipes[pi]._destroy){
+            const pp=pipes[pi];
+            for(let ei=0;ei<12;ei++) particles.push({
+              x:pp.x+pp.w/2, y:pp.top?pp.h/2:H-pp.h/2,
+              vx:(Math.random()-.5)*14, vy:(Math.random()-.5)*14,
+              r:6+Math.random()*8, col:['#e74c3c','#f39c12','#f1c40f','#fff'][ei%4], life:1
+            });
+            pipes.splice(pi,1);
+          }
         }
-    }, 1000);
+        lightFlash=10; shakeDur=15; shakeAmp=7;
+        return; // не умираем, тратим заряд
+      }
+      triggerDeath(); return;
+    }
+
+    if(!p.passed && p.top && p.x+p.w < bird.x){
+      p.passed=true; score++;
+      combo++; comboTimer=110;
+      updateBiome();
+      document.getElementById('hud-score').textContent = score;
+      updateComboUI();
+      spawnPts();
+      checkQuestsMidGame();
+      // Спидбар = прогресс внутри текущего уровня (0..100%)
+      const progressTo100 = (score % 100) / 100 * 100;
+      document.getElementById('speedbar-fill').style.width = progressTo100+'%';
+      // Разблокировка птиц: каждые 50 труб
+      const unl = getUnlocked();
+      if(unl < BIRDS.length && score > 0 && score % 50 === 0){
+        setUnlocked(unl+1);
+        unlockFlash = 180;
+        unlockFlashBird = unl; // unl = индекс только что открытой птицы (0-based)
+      }
+      // Бонус навыка птицы: каждые 10 труб
+      if(score > 0 && score % 10 === 0){
+        const sk = BIRDS[birdIdx];
+        if(sk.gunB)    activeGun    = Math.min(600, activeGun    + sk.gunB);
+        if(sk.shieldB) activeShield = Math.min(600, activeShield + sk.shieldB);
+        if(sk.ghostB)  activeGhost  = Math.min(600, activeGhost  + sk.ghostB);
+        if(sk.slowB)   activeSlow   = Math.min(600, activeSlow   + sk.slowB);
+        // Вспышка при получении навыка
+        if(sk.gunB||sk.shieldB||sk.ghostB||sk.slowB) lightFlash = 4;
+      }
+      // Бонус — случайно появляется раз в ~15 труб
+      if(bonuses.length < 3 && Math.random() < 0.14){
+        spawnBonus();
+      }
+      // Монеты — спавним при прохождении (уже видны игроку)
+      if(Math.random() < 0.55){
+        const coinX = bird.x + W*0.35 + Math.random()*W*0.15;
+        spawnCoin(coinX, H*0.12 + Math.random()*H*0.76);
+      }
+    }
+    if(p.x < -p.w-10) pipes.splice(i,1);
+  }
+
+  if(bird.y > H+20 || bird.y < -20) triggerDeath();
+
+  if(Math.random()<.0012 && lightFlash<=0) lightFlash=10+Math.floor(Math.random()*8);
+  if(lightFlash>0) lightFlash--;
+
+  frame++;
 }
 
-function drawBird() {
-    ctx.save();
-    ctx.translate(bird.x, bird.y);
-    bird.a = Math.min(Math.PI/6, Math.max(-Math.PI/6, bird.v * 0.08));
-    ctx.rotate(bird.a);
-    
-    ctx.fillStyle = birdBody;
-    let sw = Math.sin(bird.wing) * 22;
-    ctx.beginPath(); ctx.moveTo(-15, 0); ctx.quadraticCurveTo(0, -sw - 25, 15, 0); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(0, 0, 26, 11, 0, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = birdHead;
-    ctx.beginPath(); ctx.arc(17, -4, 10, 0, Math.PI*2); ctx.fill();
-    ctx.fillStyle = '#f59e0b';
-    ctx.beginPath(); ctx.moveTo(24, -4); ctx.lineTo(35, -1); ctx.lineTo(24, 2); ctx.fill();
-    ctx.restore();
+function updateComboUI(){
+  const el = document.getElementById('hud-combo');
+  if(combo>=3){ el.style.opacity='1'; el.textContent='×'+combo+' КОМБО!'; }
+  else el.style.opacity='0';
 }
 
-function update() {
-    if (!birdSelected || isOver) return;
+function spawnPts(){
+  const cols=['#f1c40f','#e67e22','#2ecc71','#fff'];
+  for(let i=0;i<7;i++) particles.push({
+    x:bird.x, y:bird.y,
+    vx:(Math.random()-.5)*5, vy:-Math.random()*4-1,
+    r:3+Math.random()*4, col:cols[i%4], life:1
+  });
+}
 
-    // Цикл времени суток (медленный)
-    cycle = (Math.sin(frame * 0.001) + 1) / 2; // 0 - ночь, 1 - день
+function updateIdle(){
+  bird.y = H/2 + Math.sin(frame*.05)*16;
+  bird.v = Math.cos(frame*.05)*.8;
+  bird.wing += .09;
+  frame++;
+}
 
-    // Рандомная гроза
-    if(gameStarted && Math.random() < 0.002 && lightning <= 0) lightning = 10;
-    if(lightning > 0) lightning--;
+// ══════════════════════════════════════════
+// СМЕРТЬ
+// ══════════════════════════════════════════
+function triggerDeath(){
+  if(STATE==='over') return;
+  STATE = 'over';
+  // Тряска экрана!
+  shakeDur = 35;
+  shakeAmp = 14;
+  hideEl('hud');
+  document.getElementById('speedbar').style.display='none';
 
-    if (!gameStarted) {
-        bird.y = h/2 + Math.sin(frame*0.06)*15;
-        bird.wing += 0.1;
+  for(let i=0;i<24;i++) particles.push({
+    x:bird.x, y:bird.y,
+    vx:(Math.random()-.5)*11, vy:(Math.random()-.5)*11,
+    r:4+Math.random()*8, col:['#e74c3c','#f1c40f','#fff'][i%3], life:1
+  });
+
+  const rec = saveScore(playerName, score, BIRDS[birdIdx].id);
+  setTimeout(()=>showGameOver(rec), 900);
+}
+
+function showGameOver(rec){
+  checkDailyQuests();
+  document.getElementById('go-score').textContent = score+' ОЧКОВ  💰'+sessionCoins;
+  document.getElementById('go-best').textContent =
+    rec.isNew ? '🎉 НОВЫЙ РЕКОРД!' : ('Твой рекорд: '+rec.best);
+  renderLB('lb-rows');
+  showEl('gameover');
+}
+
+// ══════════════════════════════════════════
+// РЕЙТИНГ
+// ══════════════════════════════════════════
+
+// ══════════════════════════════════════════
+// ЕЖЕДНЕВНЫЕ ЗАДАНИЯ
+// ══════════════════════════════════════════
+const DAILY_KEY = 'buria_daily';
+const QUEST_DEFS = [
+  { id:'pipes30',  text:'Пройди 30 труб за игру',    check:(s,c,b)=>s>=30,  reward:50  },
+  { id:'pipes60',  text:'Пройди 60 труб за игру',    check:(s,c,b)=>s>=60,  reward:100 },
+  { id:'coins10',  text:'Собери 10 монет за игру',   check:(s,c,b)=>c>=10,  reward:30  },
+  { id:'coins25',  text:'Собери 25 монет за игру',   check:(s,c,b)=>c>=25,  reward:75  },
+  { id:'bonus3',   text:'Подбери 3 бонуса за игру',  check:(s,c,b)=>b>=3,   reward:40  },
+  { id:'pipes100', text:'Пройди 100 труб за игру',   check:(s,c,b)=>s>=100, reward:200 },
+];
+
+let sessionBonusCount = 0; // бонусов подобрано за игру
+
+function getDailyState(){
+  try{ return JSON.parse(localStorage.getItem(DAILY_KEY)||'{}'); }catch(e){ return {}; }
+}
+function saveDailyState(s){ localStorage.setItem(DAILY_KEY, JSON.stringify(s)); }
+
+function checkDailyQuests(){
+  const today = new Date().toDateString();
+  let st = getDailyState();
+  if(!st||st.date !== today){ st = {date:today, done:{}}; }
+  let earned = 0;
+  let newDone = [];
+  QUEST_DEFS.forEach(q=>{
+    if(!st.done[q.id] && q.check(score, sessionCoins, sessionBonusCount)){
+      st.done[q.id] = true;
+      earned += q.reward;
+      newDone.push(q);
+    }
+  });
+  if(earned>0){
+    addCoins(earned);
+    saveDailyState(st);
+    // Баннер
+    questFlashText = '📋 ЗАДАНИЕ: '+newDone.map(q=>q.text).join(' & ')+' +'+earned+'💰';
+    questFlash = 210;
+  }
+  saveDailyState(st);
+  return st;
+}
+
+// Проверяем задания в реальном времени (раз в трубу — уже есть в score++)
+// Дополнительно — проверяем прямо во время игры при подборе монет
+function checkQuestsMidGame(){
+  const today = new Date().toDateString();
+  let st = getDailyState();
+  if(!st||st.date !== today){ st = {date:today, done:{}}; saveDailyState(st); }
+  QUEST_DEFS.forEach(q=>{
+    if(!st.done[q.id] && q.check(score, sessionCoins, sessionBonusCount)){
+      st.done[q.id] = true;
+      addCoins(q.reward);
+      saveDailyState(st);
+      questFlashText = '📋 '+q.text+' +'+q.reward+'💰';
+      questFlash = 210;
+    }
+  });
+}
+
+function drawDailyHud(){
+  if(STATE!=='playing') return;
+  const today = new Date().toDateString();
+  let st = getDailyState();
+  // Если нет данных за сегодня — создаём пустой стейт (задания ещё не выполнены)
+  if(!st||st.date!==today){ st = {date:today, done:{}}; }
+  const fs = Math.min(W,H)*0.02;
+
+  // Баннер выполненного задания (по центру вверху)
+  if(questFlash>0){
+    questFlash--;
+    const alpha = Math.min(1, questFlash/30) * Math.min(1,(questFlash>150?1:questFlash/40));
+    CX.save();
+    CX.globalAlpha=alpha;
+    const tw = CX.measureText(questFlashText).length;
+    CX.font='700 '+fs*1.1+'px Arial';
+    const bw=Math.min(W*0.85, CX.measureText(questFlashText).width+fs*2);
+    const bh=fs*1.8, bx=W/2-bw/2, by=fs*3.5;
+    CX.fillStyle='rgba(0,0,0,.75)';
+    // скруглённый прямоугольник
+    const rd=bh/2;
+    CX.beginPath();
+    CX.moveTo(bx+rd,by); CX.lineTo(bx+bw-rd,by);
+    CX.quadraticCurveTo(bx+bw,by,bx+bw,by+rd);
+    CX.lineTo(bx+bw,by+bh-rd);
+    CX.quadraticCurveTo(bx+bw,by+bh,bx+bw-rd,by+bh);
+    CX.lineTo(bx+rd,by+bh); CX.quadraticCurveTo(bx,by+bh,bx,by+bh-rd);
+    CX.lineTo(bx,by+rd); CX.quadraticCurveTo(bx,by,bx+rd,by);
+    CX.closePath(); CX.fill();
+    CX.strokeStyle='rgba(241,196,15,.6)'; CX.lineWidth=1.5; CX.stroke();
+    CX.fillStyle='#f1c40f'; CX.textAlign='center'; CX.textBaseline='middle';
+    CX.shadowBlur=8; CX.shadowColor='#f1c40f';
+    CX.fillText(questFlashText, W/2, by+bh/2);
+    CX.shadowBlur=0;
+    CX.restore();
+  }
+
+  // Активные задания слева снизу (маленькие, с наградой)
+  const pending = QUEST_DEFS.filter(q=>!(st.done&&st.done[q.id])).slice(0,2);
+  if(!pending.length) return;
+  const lineH = fs*1.5;
+  pending.forEach((q,i)=>{
+    const y = H - fs*8.5 + i*lineH; // привязка к низу экрана
+    CX.save();
+    CX.fillStyle='rgba(0,0,0,.5)';
+    CX.fillRect(6, y, Math.min(W*0.52,260), lineH*0.9);
+    CX.font='600 '+fs+'px Arial';
+    CX.textBaseline='middle'; CX.fillStyle='rgba(255,255,255,.75)';
+    CX.fillText('📋 '+q.text, 10, y+lineH*0.45);
+    // Награда справа
+    CX.textAlign='right'; CX.fillStyle='#f1c40f';
+    CX.fillText('+'+q.reward+'💰', 6+Math.min(W*0.52,260)-4, y+lineH*0.45);
+    CX.textAlign='left';
+    CX.restore();
+  });
+}
+
+const LB_KEY   = 'buria_orlov_v1';
+const UNL_KEY  = 'buria_orlov_unlocked'; // сколько птиц разблокировано
+
+function getUnlocked(){
+  return Math.max(1, parseInt(localStorage.getItem(UNL_KEY)||'1'));
+}
+function setUnlocked(n){
+  localStorage.setItem(UNL_KEY, String(n));
+}
+function getLB(){ try{return JSON.parse(localStorage.getItem(LB_KEY)||'[]');}catch(e){return[];} }
+
+function saveScore(name, s, birdId){
+  let lb = getLB();
+  const ei = lb.findIndex(e=>e.name.toLowerCase()===name.toLowerCase());
+  let prev=0, isNew=false;
+  if(ei>=0){ prev=lb[ei].s; if(s>prev){lb[ei]={name,s,birdId};isNew=true;} }
+  else{ lb.push({name,s,birdId}); isNew=true; }
+  lb.sort((a,b)=>b.s-a.s);
+  lb=lb.slice(0,20);
+  localStorage.setItem(LB_KEY, JSON.stringify(lb));
+  return {best:Math.max(s,prev), isNew};
+}
+
+function renderLB(cid){
+  const lb = getLB();
+  const el = document.getElementById(cid);
+  const ranks = ['🥇','🥈','🥉','4.','5.','6.','7.','8.'];
+  const me = playerName.toLowerCase();
+  if(!lb.length){
+    el.innerHTML='<div class="lb-row" style="opacity:.4;justify-content:center">Нет рекордов</div>';
+    return;
+  }
+  el.innerHTML = lb.slice(0,6).map((e,i)=>{
+    const isMe = e.name.toLowerCase()===me;
+    const bd = BIRDS.find(b=>b.id===e.birdId)||BIRDS[0];
+    return `<div class="lb-row${isMe?' lb-me':''}">
+      <span class="lb-rank">${ranks[i]||i+1+'.'}</span>
+      <span class="lb-icon">${bd.emoji}</span>
+      <span class="lb-name${isMe?' me':''}">${esc(e.name)}</span>
+      <span class="lb-pts">${e.s}</span>
+    </div>`;
+  }).join('');
+}
+
+function esc(s){
+  return s.replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+}
+
+// ══════════════════════════════════════════
+// РИСОВАНИЕ ФОНА
+// ══════════════════════════════════════════
+function lp3(a,b,t){ return a.map((v,i)=>Math.round(v+(b[i]-v)*Math.max(0,Math.min(1,t)))); }
+
+
+// ══════════════════════════════════════════
+// ПОГОДА
+// ══════════════════════════════════════════
+const WEATHER_TYPES = ['clear','rain','storm','wind'];
+let weather       = 'clear';
+let weatherTimer  = 0;    // кадров до смены
+let weatherAlpha  = 0;    // плавный переход 0→1
+let rainDrops     = [];
+let windParticles = [];
+let lightningTimer = 0;   // кадров до следующей молнии
+let lightningFlash = 0;   // яркость вспышки молнии
+let lightningBolts = [];  // [{x1,y1,x2,y2,alpha,segs:[]}]
+
+function initWeather(){
+  rainDrops = [];
+  windParticles = [];
+  lightningBolts = [];
+  lightningTimer = 0;
+  lightningFlash = 0;
+  weather = 'clear';
+  weatherAlpha = 0;
+  // Первая смена погоды через 8-15 секунд (480-900 кадров)
+  weatherTimer = 480 + Math.random()*420;
+}
+
+function updateWeather(){
+  weatherTimer -= DT;
+  if(weatherTimer <= 0) switchWeather();
+
+  // Плавный переход
+  if(weather !== 'clear') weatherAlpha = Math.min(1, weatherAlpha + 0.008*DT);
+
+  const isArctic = getBiome()===3;
+
+  if(isArctic){
+    // Арктика — только снег (используем rainDrops с флагом snow:true)
+    if(weather==='rain'||weather==='storm'||Math.random()<0.015*DT){
+      for(let i=0;i<3;i++) spawnSnow();
+    }
+  } else if(weather === 'rain' || weather === 'storm'){
+    // Спавн капель дождя
+    const intensity = weather==='storm' ? 8 : 4;
+    for(let i=0;i<intensity;i++){
+      rainDrops.push({
+        x: Math.random()*W*1.3 - W*0.15,
+        y: -10,
+        vx: weather==='storm' ? -2.5 : -0.5,
+        vy: 8 + Math.random()*6,
+        len: 8 + Math.random()*12,
+        alpha: 0.3 + Math.random()*0.4,
+        snow: false
+      });
+    }
+    // Молнии при шторме (не в арктике)
+    if(weather==='storm'){
+      lightningTimer -= DT;
+      if(lightningTimer <= 0){
+        spawnLightning();
+        lightningTimer = 90 + Math.random()*180;
+      }
+    }
+  }
+
+  if(weather === 'wind'){
+    // Частицы ветра
+    if(Math.random() < 0.3*DT){
+      windParticles.push({
+        x: W + 20,
+        y: Math.random()*H,
+        vx: -(4 + Math.random()*3),
+        vy: (Math.random()-0.5)*1.5,
+        len: 20 + Math.random()*40,
+        alpha: 0.1 + Math.random()*0.25,
+        life: 1
+      });
+    }
+  }
+
+  // Обновляем капли
+  for(let i=rainDrops.length-1;i>=0;i--){
+    const d=rainDrops[i];
+    d.x+=d.vx*DT; d.y+=d.vy*DT;
+    if(d.y>H+20||d.x<-20) rainDrops.splice(i,1);
+  }
+  // Обновляем ветер
+  for(let i=windParticles.length-1;i>=0;i--){
+    const p=windParticles[i];
+    p.x+=p.vx*DT; p.y+=p.vy*DT;
+    p.life-=0.012*DT;
+    if(p.x<-100||p.life<=0) windParticles.splice(i,1);
+  }
+  // Молния затухает
+  if(lightningFlash>0) lightningFlash = Math.max(0,lightningFlash-0.08*DT);
+  for(let i=lightningBolts.length-1;i>=0;i--){
+    lightningBolts[i].alpha -= 0.04*DT;
+    if(lightningBolts[i].alpha<=0) lightningBolts.splice(i,1);
+  }
+}
+
+function switchWeather(){
+  const prev = weather;
+  // Вероятности: 50% ясно, 20% дождь, 15% шторм, 15% ветер
+  const r = Math.random();
+  if(r<0.50)      weather='clear';
+  else if(r<0.70) weather='rain';
+  else if(r<0.85) weather='storm';
+  else            weather='wind';
+
+  if(weather==='clear') weatherAlpha=0;
+  weatherTimer = (weather==='clear' ? 600+Math.random()*600 : 300+Math.random()*400);
+
+  // Чистим при смене
+  if(weather==='clear'||weather==='wind'){ rainDrops=[]; }
+  if(weather!=='storm'){ lightningBolts=[]; lightningFlash=0; }
+  if(weather!=='wind')  windParticles=[];
+}
+
+function spawnLightning(){
+  lightningFlash = 1.0;
+  lightFlash = 8; // вспышка неба из drawSky
+  // Генерируем зигзаг молнии
+  const x = W*0.2 + Math.random()*W*0.6;
+  let segs = [];
+  let cx2=x, cy=0;
+  while(cy < H*0.75){
+    const nx = cx2 + (Math.random()-0.5)*80;
+    const ny = cy + 30 + Math.random()*40;
+    segs.push({x1:cx2,y1:cy,x2:nx,y2:ny});
+    // Ветки
+    if(Math.random()<0.4){
+      segs.push({x1:cx2,y1:cy,x2:cx2+(Math.random()-0.5)*60,y2:cy+20+Math.random()*30,branch:true});
+    }
+    cx2=nx; cy=ny;
+  }
+  lightningBolts.push({segs, alpha:1.0});
+}
+
+function drawWeather(){
+  if(weather==='clear'&&weatherAlpha<=0&&lightningBolts.length===0&&rainDrops.length===0&&windParticles.length===0) return;
+
+  // Молния — рисуем первой (под дождём)
+  lightningBolts.forEach(bolt=>{
+    CX.save();
+    bolt.segs.forEach(seg=>{
+      const lw = seg.branch ? 1.5 : 3;
+      CX.strokeStyle=`rgba(200,220,255,${bolt.alpha*(seg.branch?0.5:1)})`;
+      CX.lineWidth=lw;
+      CX.shadowBlur=seg.branch?8:20; CX.shadowColor='rgba(150,180,255,0.9)';
+      CX.beginPath(); CX.moveTo(seg.x1,seg.y1); CX.lineTo(seg.x2,seg.y2); CX.stroke();
+    });
+    CX.shadowBlur=0;
+    CX.restore();
+  });
+
+  // Вспышка молнии — белеет небо (уже есть lightFlash, дополнительно)
+  if(lightningFlash>0){
+    CX.save();
+    CX.fillStyle=`rgba(200,215,255,${lightningFlash*0.18})`;
+    CX.fillRect(0,0,W,H);
+    CX.restore();
+  }
+
+  // Дождь / снег
+  if(rainDrops.length>0){
+    CX.save();
+    rainDrops.forEach(d=>{
+      if(d.snow){
+        // Снежинка — белый кружок
+        CX.globalAlpha=d.alpha*(getBiome()===3?0.85:weatherAlpha);
+        CX.fillStyle='rgba(220,235,255,0.9)';
+        CX.beginPath(); CX.arc(d.x,d.y,2+d.len*0.2,0,Math.PI*2); CX.fill();
+      } else {
+        CX.globalAlpha=1;
+        CX.strokeStyle=`rgba(174,214,241,${d.alpha*weatherAlpha})`;
+        CX.lineWidth=1;
+        CX.beginPath();
+        CX.moveTo(d.x,d.y);
+        CX.lineTo(d.x+d.vx*d.len/d.vy, d.y+d.len);
+        CX.stroke();
+      }
+    });
+    CX.globalAlpha=1;
+    CX.restore();
+  }
+
+  // Ветер — белые черточки
+  if(windParticles.length>0){
+    CX.save();
+    windParticles.forEach(p=>{
+      CX.strokeStyle=`rgba(255,255,255,${p.alpha*p.life*weatherAlpha})`;
+      CX.lineWidth=1;
+      CX.beginPath(); CX.moveTo(p.x,p.y); CX.lineTo(p.x+p.len,p.y+p.vy*3); CX.stroke();
+    });
+    CX.restore();
+  }
+
+  // Тёмная туча-вуаль при шторме
+  if((weather==='rain'||weather==='storm')&&weatherAlpha>0){
+    const darkness = weather==='storm' ? 0.35 : 0.15;
+    CX.fillStyle=`rgba(10,15,30,${darkness*weatherAlpha})`;
+    CX.fillRect(0,0,W,H);
+  }
+}
+
+
+// ══════════════════════════════════════════
+// БИОМЫ
+// 0=горы, 1=пустыня, 2=море, 3=арктика
+// ══════════════════════════════════════════
+const BIOME_NAMES = ['горы','пустыня','море','арктика'];
+const BIOME_PIPES = 45; // смена каждые N труб
+let biome = 0;
+let biomeAlpha = 1.0; // 1=текущий биом полностью виден
+let prevBiome = 0;
+let biomeAnimals = []; // {type, x, y, vx, phase, flip}
+
+function getBiome(){
+  return Math.floor(score / BIOME_PIPES) % 4;
+}
+function getBiomeBlend(){
+  // 0..1 насколько мы в текущем биоме (первые 5 труб — переход)
+  const pos = score % BIOME_PIPES;
+  return Math.min(1, pos / 5);
+}
+
+function updateBiome(){
+  const nb = getBiome();
+  if(nb !== biome){
+    prevBiome = biome;
+    biome = nb;
+    biomeAnimals = [];
+    // Спавним новых животных
+    spawnAnimals();
+  }
+  biomeAlpha = getBiomeBlend();
+}
+
+function spawnAnimals(){
+  biomeAnimals = [];
+  if(biome===0){ // горы — орлы, козлы
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'eagle_bg',x:W+Math.random()*W*2,y:H*0.2+Math.random()*H*0.25,vx:-(0.4+Math.random()*0.5),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'goat',x:W+Math.random()*W*1.5,y:H*0.55+Math.random()*H*0.1,vx:-(0.2+Math.random()*0.3),phase:Math.random()*Math.PI*2,flip:false});
+  } else if(biome===1){ // пустыня — верблюды, скорпионы, стервятники
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'camel',x:W+Math.random()*W*2,y:H*0.72+Math.random()*H*0.05,vx:-(0.15+Math.random()*0.2),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'vulture',x:W+Math.random()*W*2,y:H*0.15+Math.random()*H*0.2,vx:-(0.3+Math.random()*0.4),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'scorpion',x:W+Math.random()*W*2,y:H*0.78+Math.random()*H*0.04,vx:-(0.1+Math.random()*0.15),phase:Math.random()*Math.PI*2,flip:false});
+  } else if(biome===2){ // море — акулы, киты, дельфины
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'whale',x:W+Math.random()*W*2,y:H*0.65+Math.random()*H*0.1,vx:-(0.2+Math.random()*0.25),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'shark',x:W+Math.random()*W*2,y:H*0.6+Math.random()*H*0.15,vx:-(0.35+Math.random()*0.4),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'dolphin',x:W+Math.random()*W*2,y:H*0.58+Math.random()*H*0.12,vx:-(0.4+Math.random()*0.5),phase:Math.random()*Math.PI*2,flip:false});
+  } else { // арктика — белые медведи, пингвины, тюлени
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'polarbear',x:W+Math.random()*W*2,y:H*0.72+Math.random()*H*0.05,vx:-(0.18+Math.random()*0.2),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<4;i++) biomeAnimals.push({type:'penguin',x:W+Math.random()*W*2,y:H*0.74+Math.random()*H*0.04,vx:-(0.12+Math.random()*0.15),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'seal',x:W+Math.random()*W*2,y:H*0.73+Math.random()*H*0.05,vx:-(0.2+Math.random()*0.2),phase:Math.random()*Math.PI*2,flip:false});
+  }
+}
+
+function updateAnimals(){
+  biomeAnimals.forEach(a=>{
+    a.x += a.vx * DT;
+    a.phase += 0.04 * DT;
+    if(a.x < -200) a.x = W + 100 + Math.random()*300;
+  });
+}
+
+// Рисуем животное по типу
+function drawAnimal(a){
+  const s = Math.min(W,H)/360;
+  CX.save();
+  CX.translate(a.x, a.y);
+  if(a.vx > 0) CX.scale(-1,1);
+  CX.globalAlpha = biomeAlpha * 0.88;
+
+  const t = a.phase;
+  function fill(col){CX.fillStyle=col; CX.fill();}
+  function stroke(col,lw){CX.strokeStyle=col;CX.lineWidth=lw*s;CX.stroke();}
+
+  if(a.type==='eagle_bg'){
+    // Орёл в полёте — вид сверху-сбоку
+    const flap=Math.sin(t)*0.45;
+    const wA=flap*22*s, wB=-flap*8*s;
+    // Тень
+    CX.globalAlpha=biomeAlpha*0.25;
+    CX.fillStyle='rgba(0,0,0,0.4)';
+    CX.beginPath(); CX.ellipse(0,4*s,18*s,4*s,0,0,Math.PI*2); CX.fill();
+    CX.globalAlpha=biomeAlpha*0.88;
+    // Левое крыло
+    CX.fillStyle='#3d2b1a';
+    CX.beginPath(); CX.moveTo(0,0); CX.bezierCurveTo(-8*s,wB,-24*s,wA-6*s,-30*s,wA);
+    CX.bezierCurveTo(-24*s,wA+8*s,-8*s,wB+8*s,0,5*s); CX.closePath(); CX.fill();
+    // Правое крыло
+    CX.beginPath(); CX.moveTo(0,0); CX.bezierCurveTo(8*s,wB,24*s,wA-6*s,30*s,wA);
+    CX.bezierCurveTo(24*s,wA+8*s,8*s,wB+8*s,0,5*s); CX.closePath(); CX.fill();
+    // Тело
+    CX.fillStyle='#5c3d1e';
+    CX.beginPath(); CX.ellipse(0,2*s,7*s,12*s,-0.1,0,Math.PI*2); CX.fill();
+    // Голова белая (белоголовый орлан)
+    CX.fillStyle='#f5f0e8';
+    CX.beginPath(); CX.ellipse(0,-10*s,5*s,5*s,0,0,Math.PI*2); CX.fill();
+    // Клюв
+    CX.fillStyle='#e8b830';
+    CX.beginPath(); CX.moveTo(3*s,-12*s); CX.lineTo(8*s,-10*s); CX.lineTo(4*s,-8*s); CX.closePath(); CX.fill();
+    // Полоса крыла
+    CX.fillStyle='#8b6040';
+    CX.beginPath(); CX.ellipse(-14*s,wA*0.4,10*s,2.5*s,-0.15,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.ellipse(14*s,wA*0.4,10*s,2.5*s,0.15,0,Math.PI*2); CX.fill();
+    // Перья хвоста
+    CX.fillStyle='#3d2b1a';
+    for(let fi=-2;fi<=2;fi++){
+      CX.beginPath(); CX.moveTo(fi*2.5*s,10*s);
+      CX.lineTo((fi-0.5)*3*s,18*s); CX.lineTo((fi+0.5)*3*s,18*s); CX.closePath(); CX.fill();
+    }
+  }
+  else if(a.type==='goat'){
+    const walk=Math.sin(t)*0.18;
+    // Тень
+    CX.fillStyle='rgba(0,0,0,0.2)'; CX.beginPath(); CX.ellipse(0,14*s,14*s,3*s,0,0,Math.PI*2); CX.fill();
+    // Задние ноги
+    CX.fillStyle='#a89070';
+    CX.save(); CX.translate(-7*s,2*s); CX.rotate(-walk);
+    CX.beginPath(); CX.rect(-2*s,0,4*s,10*s);
+    CX.fill(); CX.restore();
+    CX.save(); CX.translate(-2*s,2*s); CX.rotate(walk);
+    CX.fillStyle='#a89070';
+    CX.beginPath(); CX.rect(-2*s,0,4*s,10*s); CX.fill(); CX.restore();
+    // Тело
+    const bodyG=CX.createLinearGradient(-12*s,-14*s,12*s,4*s);
+    bodyG.addColorStop(0,'#d4c4a4'); bodyG.addColorStop(1,'#a89070');
+    CX.fillStyle=bodyG;
+    CX.beginPath(); CX.ellipse(0,-6*s,14*s,9*s,-0.1,0,Math.PI*2); CX.fill();
+    // Передние ноги
+    CX.fillStyle='#b4a080';
+    CX.save(); CX.translate(6*s,0*s); CX.rotate(walk);
+    CX.beginPath(); CX.rect(-2*s,0,4*s,10*s); CX.fill(); CX.restore();
+    CX.save(); CX.translate(10*s,0*s); CX.rotate(-walk);
+    CX.beginPath(); CX.rect(-2*s,0,4*s,10*s); CX.fill(); CX.restore();
+    // Шея
+    CX.fillStyle='#c8b494';
+    CX.beginPath(); CX.moveTo(9*s,-14*s); CX.lineTo(16*s,-24*s); CX.lineTo(19*s,-24*s); CX.lineTo(13*s,-14*s); CX.closePath(); CX.fill();
+    // Голова
+    const hG=CX.createRadialGradient(17*s,-27*s,1*s,16*s,-26*s,7*s);
+    hG.addColorStop(0,'#ddd0b4'); hG.addColorStop(1,'#b8a484');
+    CX.fillStyle=hG;
+    CX.beginPath(); CX.ellipse(16*s,-27*s,7*s,5*s,0.3,0,Math.PI*2); CX.fill();
+    // Ухо
+    CX.fillStyle='#c8b090';
+    CX.beginPath(); CX.ellipse(11*s,-30*s,3*s,5*s,0.6,0,Math.PI*2); CX.fill();
+    CX.fillStyle='#e8c0b0';
+    CX.beginPath(); CX.ellipse(11*s,-30*s,2*s,3.5*s,0.6,0,Math.PI*2); CX.fill();
+    // Рога закрученные
+    CX.strokeStyle='#887060'; CX.lineWidth=2*s;
+    CX.beginPath(); CX.moveTo(14*s,-31*s);
+    CX.bezierCurveTo(12*s,-38*s,16*s,-40*s,18*s,-36*s); CX.stroke();
+    CX.beginPath(); CX.moveTo(17*s,-31*s);
+    CX.bezierCurveTo(15*s,-38*s,20*s,-41*s,22*s,-37*s); CX.stroke();
+    // Глаз
+    CX.fillStyle='#1a1200'; CX.beginPath(); CX.ellipse(20*s,-28*s,1.5*s,1.2*s,0,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,255,0.6)'; CX.beginPath(); CX.arc(20.8*s,-28.5*s,0.5*s,0,Math.PI*2); CX.fill();
+    // Морда
+    CX.fillStyle='#c8b090';
+    CX.beginPath(); CX.ellipse(23*s,-25*s,3*s,2.5*s,0.2,0,Math.PI*2); CX.fill();
+    // Борода
+    CX.fillStyle='#a89070';
+    CX.beginPath(); CX.moveTo(21*s,-24*s); CX.bezierCurveTo(23*s,-22*s,22*s,-18*s,20*s,-20*s); CX.closePath(); CX.fill();
+    // Копыта тёмные
+    CX.fillStyle='#3d3020';
+    [-7,-2,6,10].forEach(lx=>{CX.beginPath();CX.ellipse(lx*s,12*s,2.5*s,1.5*s,0,0,Math.PI*2);CX.fill();});
+  }
+  else if(a.type==='camel'){
+    const walk=Math.sin(t)*0.15;
+    // Тень
+    CX.fillStyle='rgba(0,0,0,0.18)'; CX.beginPath(); CX.ellipse(0,14*s,22*s,3.5*s,0,0,Math.PI*2); CX.fill();
+    // Задние ноги
+    CX.fillStyle='#b89860';
+    [-12,-5].forEach((lx,i)=>{
+      CX.save(); CX.translate(lx*s,4*s); CX.rotate(i===0?-walk:walk);
+      // Бедро
+      CX.beginPath(); CX.rect(-3*s,0,6*s,8*s); CX.fill();
+      // Голень — угол
+      CX.save(); CX.translate(0,8*s); CX.rotate(i===0?walk*2:-walk*2);
+      CX.beginPath(); CX.rect(-2.5*s,0,5*s,8*s); CX.fill();
+      // Копыто
+      CX.fillStyle='#5a3810'; CX.beginPath(); CX.ellipse(0,9*s,3.5*s,2*s,0,0,Math.PI*2); CX.fill();
+      CX.restore(); CX.restore();
+    });
+    // Тело
+    const bodyG=CX.createLinearGradient(-22*s,-12*s,22*s,6*s);
+    bodyG.addColorStop(0,'#d4a84c'); bodyG.addColorStop(0.5,'#c89840'); bodyG.addColorStop(1,'#a87828');
+    CX.fillStyle=bodyG;
+    CX.beginPath(); CX.ellipse(0,-4*s,22*s,11*s,-0.05,0,Math.PI*2); CX.fill();
+    // Горбы — градиентные
+    const humpG=CX.createRadialGradient(-6*s,-18*s,1*s,-6*s,-18*s,10*s);
+    humpG.addColorStop(0,'#e0b860'); humpG.addColorStop(1,'#b08830');
+    CX.fillStyle=humpG;
+    CX.beginPath(); CX.ellipse(-8*s,-18*s,9*s,11*s,-0.1,0,Math.PI*2); CX.fill();
+    const humpG2=CX.createRadialGradient(6*s,-16*s,1*s,6*s,-16*s,9*s);
+    humpG2.addColorStop(0,'#d8b058'); humpG2.addColorStop(1,'#a88028');
+    CX.fillStyle=humpG2;
+    CX.beginPath(); CX.ellipse(8*s,-16*s,8*s,10*s,0.1,0,Math.PI*2); CX.fill();
+    // Передние ноги
+    [4,12].forEach((lx,i)=>{
+      CX.fillStyle='#c0a058';
+      CX.save(); CX.translate(lx*s,4*s); CX.rotate(i===0?walk:-walk);
+      CX.beginPath(); CX.rect(-3*s,0,6*s,8*s); CX.fill();
+      CX.save(); CX.translate(0,8*s); CX.rotate(i===0?-walk*2:walk*2);
+      CX.beginPath(); CX.rect(-2.5*s,0,5*s,7*s); CX.fill();
+      CX.fillStyle='#5a3810'; CX.beginPath(); CX.ellipse(0,8*s,3.5*s,2*s,0,0,Math.PI*2); CX.fill();
+      CX.restore(); CX.restore();
+    });
+    // Шея длинная
+    CX.fillStyle='#c8a040';
+    CX.beginPath(); CX.moveTo(14*s,-12*s); CX.lineTo(22*s,-30*s); CX.lineTo(28*s,-28*s); CX.lineTo(20*s,-10*s); CX.closePath(); CX.fill();
+    // Голова
+    const hG=CX.createLinearGradient(20*s,-36*s,32*s,-24*s);
+    hG.addColorStop(0,'#d8b048'); hG.addColorStop(1,'#b08828');
+    CX.fillStyle=hG;
+    CX.beginPath(); CX.ellipse(26*s,-32*s,8*s,6*s,0.4,0,Math.PI*2); CX.fill();
+    // Ухо
+    CX.fillStyle='#c0a038'; CX.beginPath(); CX.ellipse(22*s,-37*s,2.5*s,4*s,0.2,0,Math.PI*2); CX.fill();
+    CX.fillStyle='#f0c080'; CX.beginPath(); CX.ellipse(22*s,-37*s,1.5*s,2.5*s,0.2,0,Math.PI*2); CX.fill();
+    // Глаз с ресницами
+    CX.fillStyle='#1a1000'; CX.beginPath(); CX.ellipse(30*s,-33*s,1.8*s,1.5*s,0.2,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,180,0.5)'; CX.beginPath(); CX.arc(30.8*s,-33.6*s,0.6*s,0,Math.PI*2); CX.fill();
+    CX.strokeStyle='#3a2800'; CX.lineWidth=1.2*s;
+    for(let ri=0;ri<4;ri++){ const ra=Math.PI*1.3+ri*0.2; CX.beginPath(); CX.moveTo(30*s+Math.cos(ra)*1.5*s,-33*s+Math.sin(ra)*1.2*s); CX.lineTo(30*s+Math.cos(ra)*3*s,-33*s+Math.sin(ra)*2.5*s); CX.stroke(); }
+    // Ноздри
+    CX.fillStyle='#8a5818'; CX.beginPath(); CX.ellipse(33*s,-31*s,1.5*s,1*s,0.3,0,Math.PI*2); CX.fill();
+    // Губы
+    CX.strokeStyle='#8a5818'; CX.lineWidth=1.5*s;
+    CX.beginPath(); CX.moveTo(32*s,-29*s); CX.bezierCurveTo(34*s,-27*s,36*s,-28*s,34*s,-30*s); CX.stroke();
+  }
+  else if(a.type==='vulture'){
+    const flap=Math.sin(t)*0.5;
+    // Тело
+    const bG=CX.createRadialGradient(0,0,2*s,0,0,14*s);
+    bG.addColorStop(0,'#6a4a38'); bG.addColorStop(1,'#3a2418');
+    CX.fillStyle=bG; CX.beginPath(); CX.ellipse(0,0,13*s,7*s,-0.15,0,Math.PI*2); CX.fill();
+    // Крылья — безье с перьями
+    const wy=flap*14*s;
+    CX.fillStyle='#2e1c0e';
+    // Левое
+    CX.beginPath(); CX.moveTo(-2*s,-3*s); CX.bezierCurveTo(-12*s,wy-8*s,-26*s,wy-2*s,-32*s,wy);
+    CX.bezierCurveTo(-26*s,wy+10*s,-12*s,wy+4*s,-2*s,4*s); CX.closePath(); CX.fill();
+    // Правое
+    CX.beginPath(); CX.moveTo(2*s,-3*s); CX.bezierCurveTo(12*s,wy-8*s,26*s,wy-2*s,32*s,wy);
+    CX.bezierCurveTo(26*s,wy+10*s,12*s,wy+4*s,2*s,4*s); CX.closePath(); CX.fill();
+    // Первостепенные перья
+    CX.fillStyle='#1a0e08';
+    [-32,-28,-24].forEach((wx,i)=>{
+      CX.beginPath(); CX.moveTo(wx*s,wy); CX.lineTo((wx-4)*s,wy+8*s); CX.lineTo((wx+2)*s,wy+6*s); CX.closePath(); CX.fill();
+      CX.beginPath(); CX.moveTo(-wx*s,wy); CX.lineTo((-wx+4)*s,wy+8*s); CX.lineTo((-wx-2)*s,wy+6*s); CX.closePath(); CX.fill();
+    });
+    // Шея — голая красная
+    CX.fillStyle='#c05040';
+    CX.beginPath(); CX.moveTo(-4*s,-6*s); CX.lineTo(4*s,-6*s); CX.lineTo(6*s,-14*s); CX.lineTo(-6*s,-14*s); CX.closePath(); CX.fill();
+    // Сморщенная кожа шеи
+    CX.strokeStyle='#903020'; CX.lineWidth=1*s;
+    [-1,0,1].forEach(dx=>{CX.beginPath();CX.moveTo(dx*2*s,-7*s);CX.lineTo(dx*2.5*s,-13*s);CX.stroke();});
+    // Голова
+    const headG=CX.createRadialGradient(8*s,-17*s,1*s,8*s,-17*s,7*s);
+    headG.addColorStop(0,'#e07060'); headG.addColorStop(1,'#a04030');
+    CX.fillStyle=headG; CX.beginPath(); CX.ellipse(8*s,-17*s,7*s,6*s,0.3,0,Math.PI*2); CX.fill();
+    // Клюв крючком
+    CX.fillStyle='#d4b840';
+    CX.beginPath(); CX.moveTo(13*s,-16*s); CX.lineTo(20*s,-14*s); CX.bezierCurveTo(22*s,-14*s,22*s,-12*s,18*s,-13*s); CX.lineTo(13*s,-14*s); CX.closePath(); CX.fill();
+    // Глаз
+    CX.fillStyle='#e8d000'; CX.beginPath(); CX.arc(12*s,-18*s,2.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='#0a0800'; CX.beginPath(); CX.arc(12*s,-18*s,1.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,200,0.5)'; CX.beginPath(); CX.arc(12.8*s,-18.8*s,0.6*s,0,Math.PI*2); CX.fill();
+    // Хвостовые перья
+    CX.fillStyle='#3a2418';
+    for(let fi=-2;fi<=2;fi++){
+      CX.beginPath(); CX.moveTo(fi*2*s,7*s); CX.lineTo((fi-0.5)*2.5*s,16*s); CX.lineTo((fi+0.5)*2.5*s,16*s); CX.closePath(); CX.fill();
+    }
+  }
+  else if(a.type==='scorpion'){
+    // Тень
+    CX.fillStyle='rgba(0,0,0,0.2)'; CX.beginPath(); CX.ellipse(0,6*s,12*s,2.5*s,0,0,Math.PI*2); CX.fill();
+    // Хвост-дуга сегментный
+    const hq=Math.sin(t*0.5)*0.15; // покачивание хвоста
+    CX.fillStyle='#9b7a18';
+    const segs=[[-14*s,-12*s],[-10*s,-18*s],[-5*s,-22*s],[0,-22*s]];
+    segs.forEach(([sx2,sy2],i)=>{
+      CX.beginPath(); CX.ellipse(sx2,sy2+hq*i*8*s,3.5*s-(i*0.3*s),3*s-(i*0.2*s),i*0.2,0,Math.PI*2); CX.fill();
+      CX.strokeStyle='#5a4008'; CX.lineWidth=0.8*s; CX.beginPath(); CX.arc(sx2,sy2+hq*i*8*s,3.2*s-(i*0.3*s),0.8,2.4); CX.stroke();
+    });
+    // Жало
+    CX.fillStyle='#cc2200'; CX.beginPath(); CX.moveTo(-14*s,-15*s+hq*4*s); CX.lineTo(-20*s,-22*s+hq*4*s); CX.lineTo(-13*s,-20*s+hq*4*s); CX.closePath(); CX.fill();
+    // Брюшко
+    const abdG=CX.createLinearGradient(-5*s,-6*s,5*s,2*s);
+    abdG.addColorStop(0,'#c89820'); abdG.addColorStop(1,'#8a6010');
+    CX.fillStyle=abdG; CX.beginPath(); CX.ellipse(-2*s,-2*s,9*s,6*s,-0.1,0,Math.PI*2); CX.fill();
+    // Сегменты брюшка
+    CX.strokeStyle='#6a4a08'; CX.lineWidth=0.8*s;
+    [-8,-3,2,7].forEach(bx=>{CX.beginPath();CX.moveTo(bx*s,-7*s);CX.bezierCurveTo(bx*s+1,-4*s,bx*s+1,0,bx*s,-2*s);CX.stroke();});
+    // Карапакс (голова+грудь)
+    const capG=CX.createRadialGradient(6*s,-1*s,1*s,6*s,-1*s,10*s);
+    capG.addColorStop(0,'#e0a020'); capG.addColorStop(1,'#9a6810');
+    CX.fillStyle=capG; CX.beginPath(); CX.ellipse(7*s,-1*s,9*s,7*s,0.1,0,Math.PI*2); CX.fill();
+    // Глаза (4 пары)
+    CX.fillStyle='#0a0a0a';
+    [[10,-4],[12,-2],[8,-5],[14,-4]].forEach(([ex,ey])=>{CX.beginPath();CX.arc(ex*s,ey*s,1*s,0,Math.PI*2);CX.fill();});
+    // Клешни
+    CX.fillStyle='#b88a18';
+    // Левая
+    CX.save(); CX.translate(14*s,-3*s); CX.rotate(-0.3+Math.sin(t)*0.1);
+    CX.beginPath(); CX.rect(0,-2*s,10*s,3*s); CX.fill();
+    CX.translate(10*s,0);
+    CX.fillStyle='#c89a20';
+    CX.beginPath(); CX.ellipse(3*s,0,4*s,3*s,0,0,Math.PI*2); CX.fill();
+    CX.fillStyle='#8a6010';
+    CX.beginPath(); CX.moveTo(-1*s,-3*s); CX.bezierCurveTo(2*s,-6*s,6*s,-5*s,6*s,-2*s); CX.stroke();
+    CX.restore();
+    // Правая
+    CX.fillStyle='#b88a18';
+    CX.save(); CX.translate(14*s,1*s); CX.rotate(0.3-Math.sin(t)*0.1);
+    CX.beginPath(); CX.rect(0,-2*s,10*s,3*s); CX.fill();
+    CX.translate(10*s,0);
+    CX.fillStyle='#c89a20';
+    CX.beginPath(); CX.ellipse(3*s,0,4*s,3*s,0,0,Math.PI*2); CX.fill();
+    CX.restore();
+    // Ноги (8 штук по 4 с каждой стороны)
+    CX.strokeStyle='#7a5808'; CX.lineWidth=1.2*s;
+    [-3,0,3,6].forEach((lx,i)=>{
+      const la=0.4+Math.sin(t+i*0.8)*0.2;
+      CX.beginPath(); CX.moveTo(lx*s,-3*s); CX.lineTo((lx-6)*s,-9*s); CX.lineTo((lx-8)*s,-3*s); CX.stroke();
+      CX.beginPath(); CX.moveTo(lx*s,1*s); CX.lineTo((lx-6)*s,7*s); CX.lineTo((lx-8)*s,2*s); CX.stroke();
+    });
+  }
+  else if(a.type==='whale'){
+    const bob=Math.sin(t)*5*s, tailWave=Math.sin(t*0.8)*0.2;
+    CX.translate(0,bob);
+    // Тело основное — синий кит
+    const bG=CX.createLinearGradient(-38*s,-16*s,38*s,16*s);
+    bG.addColorStop(0,'#1a4a7a'); bG.addColorStop(0.4,'#2a6aaa'); bG.addColorStop(1,'#1a3a5a');
+    CX.fillStyle=bG; CX.beginPath(); CX.moveTo(36*s,0); CX.bezierCurveTo(36*s,-12*s,10*s,-16*s,-20*s,-10*s);
+    CX.bezierCurveTo(-35*s,-6*s,-40*s,0,-38*s,4*s);
+    CX.bezierCurveTo(-35*s,10*s,-20*s,14*s,10*s,12*s);
+    CX.bezierCurveTo(22*s,12*s,36*s,10*s,36*s,0); CX.closePath(); CX.fill();
+    // Хвостовой плавник
+    CX.save(); CX.translate(-38*s,2*s); CX.rotate(tailWave);
+    CX.fillStyle='#164070';
+    CX.beginPath(); CX.moveTo(0,0); CX.bezierCurveTo(-6*s,-10*s,-14*s,-12*s,-18*s,-6*s);
+    CX.bezierCurveTo(-16*s,-1*s,-10*s,2*s,0,2*s); CX.closePath(); CX.fill();
+    CX.beginPath(); CX.moveTo(0,0); CX.bezierCurveTo(-6*s,10*s,-14*s,12*s,-18*s,6*s);
+    CX.bezierCurveTo(-16*s,1*s,-10*s,-2*s,0,-2*s); CX.closePath(); CX.fill();
+    CX.restore();
+    // Брюхо светлое
+    const bG2=CX.createLinearGradient(0,-4*s,0,12*s);
+    bG2.addColorStop(0,'#6aaan0'.replace('n','a')); bG2.addColorStop(0,'#6aaad0'); bG2.addColorStop(1,'#3a7aaa');
+    CX.fillStyle='rgba(100,180,220,0.55)';
+    CX.beginPath(); CX.ellipse(5*s,6*s,24*s,8*s,0.1,0,Math.PI*2); CX.fill();
+    // Бороздки на брюхе
+    CX.strokeStyle='rgba(50,120,180,0.4)'; CX.lineWidth=1*s;
+    [-4,-1,2,5,8].forEach(bx=>{
+      CX.beginPath(); CX.moveTo((bx-2)*s,0); CX.bezierCurveTo((bx-1)*s,8*s,(bx+1)*s,12*s,(bx+2)*s,4*s); CX.stroke();
+    });
+    // Грудной плавник
+    CX.fillStyle='#1a4070';
+    CX.beginPath(); CX.moveTo(10*s,8*s); CX.bezierCurveTo(5*s,14*s,-8*s,22*s,-14*s,18*s);
+    CX.bezierCurveTo(-10*s,12*s,4*s,8*s,10*s,8*s); CX.closePath(); CX.fill();
+    // Голова с ртом
+    CX.fillStyle='#1a3060';
+    CX.beginPath(); CX.ellipse(32*s,-2*s,6*s,9*s,0.1,0,Math.PI*2); CX.fill();
+    // Линия рта
+    CX.strokeStyle='#0a2040'; CX.lineWidth=2*s;
+    CX.beginPath(); CX.moveTo(28*s,3*s); CX.bezierCurveTo(32*s,6*s,36*s,4*s,38*s,1*s); CX.stroke();
+    // Глаз
+    CX.fillStyle='#0a1820'; CX.beginPath(); CX.arc(30*s,-5*s,2.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,255,0.6)'; CX.beginPath(); CX.arc(31*s,-6*s,0.8*s,0,Math.PI*2); CX.fill();
+    // Дыхало
+    CX.fillStyle='#102840';
+    CX.beginPath(); CX.ellipse(22*s,-14*s,3*s,1.5*s,0,0,Math.PI*2); CX.fill();
+    // Фонтан
+    if(Math.sin(t)>0.6){
+      CX.strokeStyle='rgba(180,230,255,0.7)'; CX.lineWidth=2*s;
+      for(let fi=0;fi<4;fi++){
+        const fx=(fi-1.5)*4*s;
+        CX.beginPath(); CX.moveTo(22*s+fx,-15*s); CX.bezierCurveTo(21*s+fx,-24*s,24*s+fx*1.5,-32*s,22*s+fx*2,-26*s); CX.stroke();
+      }
+    }
+  }
+  else if(a.type==='shark'){
+    const bob=Math.sin(t)*3*s, bodyWave=Math.sin(t*0.6)*0.08;
+    CX.translate(0,bob);
+    CX.save(); CX.rotate(bodyWave);
+    // Тело
+    const bG=CX.createLinearGradient(0,-10*s,0,10*s);
+    bG.addColorStop(0,'#4a6070'); bG.addColorStop(0.6,'#607888'); bG.addColorStop(1,'#384858');
+    CX.fillStyle=bG;
+    CX.beginPath(); CX.moveTo(34*s,0); CX.bezierCurveTo(34*s,-8*s,16*s,-10*s,-12*s,-7*s);
+    CX.bezierCurveTo(-26*s,-4*s,-32*s,0,-30*s,4*s);
+    CX.bezierCurveTo(-26*s,8*s,-12*s,9*s,16*s,7*s);
+    CX.bezierCurveTo(28*s,7*s,34*s,6*s,34*s,0); CX.closePath(); CX.fill();
+    // Хвост
+    CX.fillStyle='#384858';
+    CX.beginPath(); CX.moveTo(-30*s,0); CX.bezierCurveTo(-36*s,-8*s,-44*s,-10*s,-42*s,-4*s);
+    CX.bezierCurveTo(-40*s,0,-36*s,2*s,-30*s,2*s); CX.closePath(); CX.fill();
+    CX.beginPath(); CX.moveTo(-30*s,2*s); CX.bezierCurveTo(-36*s,8*s,-44*s,10*s,-42*s,4*s);
+    CX.bezierCurveTo(-40*s,0,-36*s,-2*s,-30*s,-2*s); CX.closePath(); CX.fill();
+    // Брюхо
+    CX.fillStyle='rgba(220,228,232,0.8)';
+    CX.beginPath(); CX.ellipse(5*s,4*s,20*s,6*s,0.05,0,Math.PI*2); CX.fill();
+    // Боковая линия
+    CX.strokeStyle='rgba(80,110,130,0.5)'; CX.lineWidth=1*s;
+    CX.beginPath(); CX.moveTo(30*s,-1*s); CX.bezierCurveTo(0,-2*s,-20*s,-1*s,-30*s,2*s); CX.stroke();
+    // Спинной плавник
+    CX.fillStyle='#384858';
+    CX.beginPath(); CX.moveTo(6*s,-10*s); CX.bezierCurveTo(8*s,-26*s,16*s,-28*s,18*s,-10*s); CX.closePath(); CX.fill();
+    // Малый спинной
+    CX.beginPath(); CX.moveTo(-16*s,-7*s); CX.bezierCurveTo(-14*s,-14*s,-10*s,-14*s,-8*s,-7*s); CX.closePath(); CX.fill();
+    // Грудные плавники
+    CX.fillStyle='#3a5060';
+    CX.beginPath(); CX.moveTo(10*s,7*s); CX.bezierCurveTo(4*s,14*s,-6*s,18*s,-12*s,13*s);
+    CX.bezierCurveTo(-8*s,8*s,4*s,7*s,10*s,7*s); CX.closePath(); CX.fill();
+    // Голова и морда
+    CX.fillStyle='#506070';
+    CX.beginPath(); CX.moveTo(22*s,-6*s); CX.bezierCurveTo(30*s,-6*s,36*s,-2*s,36*s,2*s);
+    CX.bezierCurveTo(36*s,6*s,30*s,8*s,22*s,8*s); CX.closePath(); CX.fill();
+    // Ноздри
+    CX.fillStyle='#1a2a38';
+    CX.beginPath(); CX.ellipse(33*s,-1*s,1.5*s,0.8*s,0.3,0,Math.PI*2); CX.fill();
+    // Глаз
+    CX.fillStyle='#0a0f14'; CX.beginPath(); CX.arc(26*s,-3*s,3*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(40,80,120,0.5)'; CX.beginPath(); CX.arc(26*s,-3*s,2.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(200,220,240,0.4)'; CX.beginPath(); CX.arc(27*s,-4*s,0.8*s,0,Math.PI*2); CX.fill();
+    // Зубы
+    CX.fillStyle='#dde8ee';
+    for(let zi=0;zi<6;zi++){
+      CX.beginPath(); CX.moveTo((22+zi*2.5)*s,7*s); CX.lineTo((23+zi*2.5)*s,10*s); CX.lineTo((24+zi*2.5)*s,7*s); CX.closePath(); CX.fill();
+    }
+    CX.restore();
+  }
+  else if(a.type==='dolphin'){
+    const bob=Math.sin(t)*6*s, arch=Math.sin(t*0.8)*0.15;
+    CX.translate(0,bob);
+    CX.save(); CX.rotate(arch);
+    const bG=CX.createLinearGradient(0,-8*s,0,8*s);
+    bG.addColorStop(0,'#2a6090'); bG.addColorStop(0.6,'#3a80b0'); bG.addColorStop(1,'#1a4070');
+    CX.fillStyle=bG;
+    CX.beginPath(); CX.moveTo(24*s,0); CX.bezierCurveTo(24*s,-7*s,8*s,-9*s,-12*s,-6*s);
+    CX.bezierCurveTo(-22*s,-3*s,-26*s,0,-24*s,3*s);
+    CX.bezierCurveTo(-20*s,7*s,8*s,8*s,24*s,0); CX.closePath(); CX.fill();
+    // Хвост
+    CX.fillStyle='#1a4070';
+    CX.beginPath(); CX.moveTo(-24*s,0); CX.bezierCurveTo(-28*s,-7*s,-36*s,-8*s,-34*s,-3*s);
+    CX.bezierCurveTo(-32*s,0,-28*s,2*s,-24*s,2*s); CX.closePath(); CX.fill();
+    CX.beginPath(); CX.moveTo(-24*s,0); CX.bezierCurveTo(-28*s,7*s,-36*s,8*s,-34*s,3*s);
+    CX.bezierCurveTo(-32*s,0,-28*s,-2*s,-24*s,-2*s); CX.closePath(); CX.fill();
+    // Брюхо
+    CX.fillStyle='rgba(220,235,248,0.8)';
+    CX.beginPath(); CX.ellipse(4*s,3*s,15*s,5*s,0.05,0,Math.PI*2); CX.fill();
+    // Спинной плавник
+    CX.fillStyle='#1a4070';
+    CX.beginPath(); CX.moveTo(4*s,-9*s); CX.bezierCurveTo(6*s,-18*s,12*s,-18*s,12*s,-9*s); CX.closePath(); CX.fill();
+    // Грудной плавник
+    CX.fillStyle='#2a5080';
+    CX.beginPath(); CX.moveTo(8*s,5*s); CX.bezierCurveTo(2*s,12*s,-8*s,14*s,-12*s,9*s);
+    CX.bezierCurveTo(-8*s,5*s,2*s,4*s,8*s,5*s); CX.closePath(); CX.fill();
+    // Морда
+    CX.fillStyle='#3070a0';
+    CX.beginPath(); CX.moveTo(18*s,-5*s); CX.bezierCurveTo(24*s,-5*s,28*s,-1*s,28*s,2*s);
+    CX.bezierCurveTo(28*s,5*s,24*s,7*s,18*s,6*s); CX.closePath(); CX.fill();
+    // Клюв-рострум
+    CX.fillStyle='#4080b0';
+    CX.beginPath(); CX.moveTo(24*s,0); CX.bezierCurveTo(28*s,-2*s,36*s,-1*s,36*s,1*s);
+    CX.bezierCurveTo(36*s,3*s,28*s,3*s,24*s,2*s); CX.closePath(); CX.fill();
+    // Улыбка
+    CX.strokeStyle='#0a2040'; CX.lineWidth=1.5*s;
+    CX.beginPath(); CX.moveTo(26*s,2*s); CX.bezierCurveTo(28*s,5*s,32*s,5*s,34*s,2*s); CX.stroke();
+    // Глаз
+    CX.fillStyle='#0a1820'; CX.beginPath(); CX.arc(22*s,-2*s,2.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,255,0.6)'; CX.beginPath(); CX.arc(23*s,-3*s,0.8*s,0,Math.PI*2); CX.fill();
+    // Полоска
+    CX.fillStyle='rgba(30,60,100,0.4)';
+    CX.beginPath(); CX.moveTo(18*s,-7*s); CX.bezierCurveTo(8*s,-6*s,-2*s,-5*s,-14*s,-4*s);
+    CX.bezierCurveTo(-14*s,-2*s,-2*s,-3*s,8*s,-4*s); CX.bezierCurveTo(18*s,-5*s,18*s,-5*s,18*s,-7*s); CX.closePath(); CX.fill();
+    CX.restore();
+  }
+  else if(a.type==='polarbear'){
+    const walk=Math.sin(t)*0.2;
+    // Тень
+    CX.fillStyle='rgba(0,0,80,0.15)'; CX.beginPath(); CX.ellipse(0,16*s,18*s,3*s,0,0,Math.PI*2); CX.fill();
+    // Задние ноги
+    CX.fillStyle='#e8e4d8';
+    [-12,-5].forEach((lx,i)=>{
+      CX.save(); CX.translate(lx*s,4*s); CX.rotate(i===0?-walk:walk);
+      CX.beginPath(); CX.ellipse(0,5*s,4.5*s,6*s,0,0,Math.PI*2); CX.fill();
+      CX.save(); CX.translate(0,8*s); CX.rotate(i===0?walk:-walk);
+      CX.beginPath(); CX.ellipse(0,3.5*s,3.5*s,5*s,0,0,Math.PI*2); CX.fill();
+      // Лапа
+      CX.fillStyle='#d0ccbc';
+      CX.beginPath(); CX.ellipse(-1*s,8*s,5*s,2.5*s,0.1,0,Math.PI*2); CX.fill();
+      // Когти
+      CX.fillStyle='#8a7a60';
+      [-3,0,3].forEach(cx2=>{CX.beginPath();CX.moveTo(cx2*s,9*s);CX.lineTo((cx2-0.5)*s,12*s);CX.lineTo((cx2+0.5)*s,12*s);CX.closePath();CX.fill();});
+      CX.restore(); CX.restore();
+    });
+    // Тело
+    const bodyG=CX.createRadialGradient(-2*s,-4*s,2*s,-2*s,-4*s,18*s);
+    bodyG.addColorStop(0,'#faf8f0'); bodyG.addColorStop(0.6,'#e8e4d4'); bodyG.addColorStop(1,'#d4cebe');
+    CX.fillStyle=bodyG;
+    CX.beginPath(); CX.ellipse(-2*s,-4*s,18*s,11*s,0,0,Math.PI*2); CX.fill();
+    // Подшёрсток текстура
+    CX.strokeStyle='rgba(200,195,180,0.3)'; CX.lineWidth=0.8*s;
+    for(let fi=0;fi<8;fi++){
+      const fa=fi/8*Math.PI*2;
+      CX.beginPath(); CX.moveTo(-2*s+Math.cos(fa)*6*s,-4*s+Math.sin(fa)*5*s);
+      CX.lineTo(-2*s+Math.cos(fa)*15*s,-4*s+Math.sin(fa)*8*s); CX.stroke();
+    }
+    // Передние ноги
+    [4,11].forEach((lx,i)=>{
+      CX.fillStyle='#e4e0d0';
+      CX.save(); CX.translate(lx*s,1*s); CX.rotate(i===0?walk:-walk);
+      CX.beginPath(); CX.ellipse(0,5*s,4*s,6*s,0,0,Math.PI*2); CX.fill();
+      CX.save(); CX.translate(0,8*s); CX.rotate(i===0?-walk:walk);
+      CX.beginPath(); CX.ellipse(0,3*s,3*s,4.5*s,0,0,Math.PI*2); CX.fill();
+      CX.fillStyle='#d0ccbc';
+      CX.beginPath(); CX.ellipse(-1*s,7*s,4.5*s,2.5*s,0.1,0,Math.PI*2); CX.fill();
+      CX.fillStyle='#8a7a60';
+      [-3,0,3].forEach(cx2=>{CX.beginPath();CX.moveTo(cx2*s,8*s);CX.lineTo((cx2-0.5)*s,11*s);CX.lineTo((cx2+0.5)*s,11*s);CX.closePath();CX.fill();});
+      CX.restore(); CX.restore();
+    });
+    // Шея
+    CX.fillStyle='#ede9d8';
+    CX.beginPath(); CX.ellipse(12*s,-10*s,5*s,7*s,-0.2,0,Math.PI*2); CX.fill();
+    // Голова
+    const headG=CX.createRadialGradient(16*s,-16*s,2*s,16*s,-16*s,9*s);
+    headG.addColorStop(0,'#faf8f0'); headG.addColorStop(1,'#dedad0');
+    CX.fillStyle=headG;
+    CX.beginPath(); CX.ellipse(16*s,-16*s,9*s,8*s,0.15,0,Math.PI*2); CX.fill();
+    // Уши круглые
+    CX.fillStyle='#e4e0d0';
+    CX.beginPath(); CX.arc(10*s,-22*s,4*s,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.arc(16*s,-23*s,4*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,220,200,0.4)';
+    CX.beginPath(); CX.arc(10*s,-22*s,2.5*s,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.arc(16*s,-23*s,2.5*s,0,Math.PI*2); CX.fill();
+    // Морда тёмная
+    CX.fillStyle='#2a1a10';
+    CX.beginPath(); CX.ellipse(23*s,-14*s,3.5*s,3*s,0.2,0,Math.PI*2); CX.fill();
+    // Нос
+    CX.fillStyle='#1a1010';
+    CX.beginPath(); CX.ellipse(23*s,-14*s,2.5*s,2*s,0.2,0,Math.PI*2); CX.fill();
+    // Ноздри
+    CX.fillStyle='#0a0808'; CX.beginPath(); CX.arc(22*s,-13*s,0.7*s,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.arc(24*s,-13*s,0.7*s,0,Math.PI*2); CX.fill();
+    // Глаза
+    CX.fillStyle='#0a0a08'; CX.beginPath(); CX.arc(19*s,-18*s,2*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,255,0.6)'; CX.beginPath(); CX.arc(20*s,-19*s,0.7*s,0,Math.PI*2); CX.fill();
+    // Рот
+    CX.strokeStyle='#1a1010'; CX.lineWidth=1.2*s;
+    CX.beginPath(); CX.moveTo(20*s,-12*s); CX.bezierCurveTo(22*s,-10*s,26*s,-10*s,26*s,-12*s); CX.stroke();
+  }
+  else if(a.type==='penguin'){
+    const bob=Math.sin(t)*1.5*s, walk=Math.sin(t)*0.12;
+    CX.translate(0,bob);
+    // Тень
+    CX.fillStyle='rgba(0,0,60,0.15)'; CX.beginPath(); CX.ellipse(0,14*s,7*s,2*s,0,0,Math.PI*2); CX.fill();
+    // Лапы
+    CX.fillStyle='#e85a00';
+    CX.save(); CX.translate(-3*s,11*s); CX.rotate(walk);
+    CX.beginPath(); CX.ellipse(0,2*s,4.5*s,2*s,0.2,0,Math.PI*2); CX.fill();
+    CX.restore();
+    CX.save(); CX.translate(3*s,11*s); CX.rotate(-walk);
+    CX.fillStyle='#e85a00';
+    CX.beginPath(); CX.ellipse(0,2*s,4.5*s,2*s,-0.2,0,Math.PI*2); CX.fill();
+    CX.restore();
+    // Тело — чёрная спина
+    CX.fillStyle='#141414';
+    CX.beginPath(); CX.ellipse(0,2*s,7*s,11*s,0,0,Math.PI*2); CX.fill();
+    // Белое брюхо
+    const bellyG=CX.createRadialGradient(0,3*s,1*s,0,3*s,6*s);
+    bellyG.addColorStop(0,'#f5f5f0'); bellyG.addColorStop(1,'#d8d8d0');
+    CX.fillStyle=bellyG;
+    CX.beginPath(); CX.ellipse(0,3*s,4.5*s,8*s,0,0,Math.PI*2); CX.fill();
+    // Крылья-ласты
+    CX.fillStyle='#0e0e0e';
+    CX.beginPath(); CX.ellipse(-8*s,2*s,3*s,7.5*s,0.25,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.ellipse(8*s,2*s,3*s,7.5*s,-0.25,0,Math.PI*2); CX.fill();
+    // Голова
+    CX.fillStyle='#141414';
+    CX.beginPath(); CX.arc(0,-10*s,7.5*s,0,Math.PI*2); CX.fill();
+    // Белые пятна у глаз
+    CX.fillStyle='#e8e8e0';
+    CX.beginPath(); CX.ellipse(-3.5*s,-10*s,3*s,3.5*s,0.2,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.ellipse(3.5*s,-10*s,3*s,3.5*s,-0.2,0,Math.PI*2); CX.fill();
+    // Глаза
+    CX.fillStyle='#0a0a0a'; CX.beginPath(); CX.arc(-3.5*s,-10*s,2*s,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.arc(3.5*s,-10*s,2*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,255,0.7)'; CX.beginPath(); CX.arc(-2.8*s,-10.8*s,0.7*s,0,Math.PI*2); CX.fill();
+    CX.beginPath(); CX.arc(4.2*s,-10.8*s,0.7*s,0,Math.PI*2); CX.fill();
+    // Клюв
+    CX.fillStyle='#e86000';
+    CX.beginPath(); CX.moveTo(-2.5*s,-7*s); CX.bezierCurveTo(-3*s,-5*s,3*s,-5*s,2.5*s,-7*s); CX.closePath(); CX.fill();
+    CX.fillStyle='#cc4a00';
+    CX.beginPath(); CX.moveTo(-2*s,-7.5*s); CX.lineTo(0,-6*s); CX.lineTo(2*s,-7.5*s); CX.closePath(); CX.fill();
+    // Жёлтая полоска на голове (золотой пингвин)
+    CX.fillStyle='rgba(255,200,0,0.6)';
+    CX.beginPath(); CX.ellipse(0,-15*s,2*s,4*s,0,0,Math.PI*2); CX.fill();
+  }
+  else if(a.type==='seal'){
+    const bob=Math.sin(t)*2.5*s, flex=Math.sin(t*0.7)*0.12;
+    CX.translate(0,bob);
+    // Тень
+    CX.fillStyle='rgba(0,0,60,0.15)'; CX.beginPath(); CX.ellipse(-2*s,10*s,20*s,3*s,0,0,Math.PI*2); CX.fill();
+    // Хвост-ласты
+    CX.fillStyle='#6a7870';
+    CX.save(); CX.translate(-20*s,0); CX.rotate(flex);
+    CX.beginPath(); CX.moveTo(0,0); CX.bezierCurveTo(-4*s,-8*s,-12*s,-8*s,-14*s,-2*s);
+    CX.bezierCurveTo(-12*s,2*s,-4*s,2*s,0,2*s); CX.closePath(); CX.fill();
+    CX.beginPath(); CX.moveTo(0,0); CX.bezierCurveTo(-4*s,8*s,-12*s,8*s,-14*s,2*s);
+    CX.bezierCurveTo(-12*s,-2*s,-4*s,-2*s,0,-2*s); CX.closePath(); CX.fill();
+    CX.restore();
+    // Тело
+    const bodyG=CX.createRadialGradient(-2*s,0,2*s,-2*s,0,20*s);
+    bodyG.addColorStop(0,'#9aa090'); bodyG.addColorStop(0.5,'#788078'); bodyG.addColorStop(1,'#505850');
+    CX.fillStyle=bodyG;
+    CX.beginPath(); CX.ellipse(-2*s,0,20*s,9*s,0.05,0,Math.PI*2); CX.fill();
+    // Пятна
+    CX.fillStyle='rgba(40,50,40,0.2)';
+    [[-8,-3],[0,4],[4,-5],[-14,2],[8,3]].forEach(([px,py])=>{
+      CX.beginPath(); CX.ellipse(px*s,py*s,2.5*s,1.5*s,Math.random(),0,Math.PI*2); CX.fill();
+    });
+    // Брюхо
+    CX.fillStyle='rgba(180,185,175,0.55)';
+    CX.beginPath(); CX.ellipse(-2*s,4*s,14*s,6*s,0,0,Math.PI*2); CX.fill();
+    // Ласты передние
+    CX.fillStyle='#688068';
+    CX.beginPath(); CX.moveTo(8*s,4*s); CX.bezierCurveTo(6*s,10*s,-2*s,14*s,-6*s,10*s);
+    CX.bezierCurveTo(-4*s,5*s,4*s,4*s,8*s,4*s); CX.closePath(); CX.fill();
+    // Голова
+    const headG=CX.createRadialGradient(18*s,-2*s,2*s,18*s,-2*s,8*s);
+    headG.addColorStop(0,'#8a9888'); headG.addColorStop(1,'#607060');
+    CX.fillStyle=headG;
+    CX.beginPath(); CX.ellipse(18*s,-2*s,8*s,7*s,0.1,0,Math.PI*2); CX.fill();
+    // Морда
+    CX.fillStyle='#788878';
+    CX.beginPath(); CX.ellipse(24*s,-1*s,4*s,3*s,0.1,0,Math.PI*2); CX.fill();
+    // Нос
+    CX.fillStyle='#2a1a18'; CX.beginPath(); CX.ellipse(26*s,-1*s,2*s,1.5*s,0.1,0,Math.PI*2); CX.fill();
+    // Усы
+    CX.strokeStyle='rgba(230,225,215,0.9)'; CX.lineWidth=0.9*s;
+    for(let wi=0;wi<6;wi++){
+      const wy=(-2+wi*0.7)*s, wd=wi<3?1:-1;
+      CX.beginPath(); CX.moveTo(27*s,wy); CX.bezierCurveTo(30*s,wy-wd*s,34*s,wy-wd*0.5*s,36*s,wy+wd*s); CX.stroke();
+    }
+    // Глаза большие
+    CX.fillStyle='#0a0a08'; CX.beginPath(); CX.arc(20*s,-5*s,3*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(60,80,60,0.5)'; CX.beginPath(); CX.arc(20*s,-5*s,2.5*s,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(255,255,255,0.7)'; CX.beginPath(); CX.arc(21*s,-6*s,1*s,0,Math.PI*2); CX.fill();
+    // Ухо-дырка
+    CX.fillStyle='#404840'; CX.beginPath(); CX.arc(16*s,-8*s,1.5*s,0,Math.PI*2); CX.fill();
+  }
+
+  CX.globalAlpha=1;
+  CX.restore();
+}
+
+function drawAnimals(){
+  if(STATE!=='playing'&&STATE!=='over') return;
+  biomeAnimals.forEach(a=>drawAnimal(a));
+}
+
+// ══════════════════════════════════════════
+// ПЕЙЗАЖ БИОМА — заменяет drawMountains
+// ══════════════════════════════════════════
+function getBiomeGroundColor(bm, layer){
+  const layerDark = 0.7 + layer*0.1;
+  if(bm===0){ // горы
+    return [`rgb(${[18,28,55].map(v=>Math.round(v*layerDark))})`,
+            `rgb(${[75,55,75].map(v=>Math.round(v*layerDark))})`];
+  } else if(bm===1){ // пустыня
+    return [`rgb(${[180,120,40].map(v=>Math.round(v*layerDark))})`,
+            `rgb(${[210,160,70].map(v=>Math.round(v*layerDark))})`];
+  } else if(bm===2){ // море
+    return [`rgb(${[10,40,100].map(v=>Math.round(v*layerDark))})`,
+            `rgb(${[20,80,160].map(v=>Math.round(v*layerDark))})`];
+  } else { // арктика
+    return [`rgb(${[160,190,220].map(v=>Math.round(v*layerDark))})`,
+            `rgb(${[200,220,240].map(v=>Math.round(v*layerDark))})`];
+  }
+}
+
+function drawBiomeForeground(){
+  // Наземный слой биома внизу экрана (под животными)
+  const nb = getBiome();
+  const blend = getBiomeBlend();
+  const groundH = H * 0.08;
+  const groundY = H - groundH;
+
+  if(nb===0){ // горы — снег на вершинах уже в drawMountains
+    return;
+  }
+  else if(nb===1){ // пустыня — песчаная земля + кактусы
+    CX.save();
+    CX.globalAlpha = blend;
+    const g = CX.createLinearGradient(0,groundY,0,H);
+    g.addColorStop(0,'#d4a843'); g.addColorStop(1,'#c8944a');
+    CX.fillStyle=g; CX.fillRect(0,groundY,W,groundH);
+    // Дюны
+    CX.fillStyle='#e8b855';
+    for(let dx=0;dx<W;dx+=80){
+      CX.beginPath(); CX.ellipse(dx+40,groundY,50,groundH*0.4,0,Math.PI,0); CX.fill();
+    }
+    CX.globalAlpha=1;
+    CX.restore();
+  }
+  else if(nb===2){ // море — вода с волнами
+    CX.save();
+    CX.globalAlpha = blend;
+    const g2 = CX.createLinearGradient(0,groundY,0,H);
+    g2.addColorStop(0,'rgba(30,100,200,0.85)'); g2.addColorStop(1,'rgba(10,50,130,0.95)');
+    CX.fillStyle=g2; CX.fillRect(0,groundY,W,groundH);
+    // Волны
+    CX.strokeStyle='rgba(150,210,255,0.5)'; CX.lineWidth=2;
+    const wt = (Date.now()/800)%1;
+    for(let wx=0;wx<W+40;wx+=40){
+      const ox = (wx + wt*40) % (W+40) - 20;
+      CX.beginPath(); CX.moveTo(ox,groundY+groundH*0.3);
+      CX.quadraticCurveTo(ox+10,groundY,ox+20,groundY+groundH*0.3);
+      CX.stroke();
+    }
+    CX.globalAlpha=1;
+    CX.restore();
+  }
+  else { // арктика — снег + лёд
+    CX.save();
+    CX.globalAlpha = blend;
+    const g3 = CX.createLinearGradient(0,groundY,0,H);
+    g3.addColorStop(0,'#d8eef8'); g3.addColorStop(1,'#a8cce0');
+    CX.fillStyle=g3; CX.fillRect(0,groundY,W,groundH);
+    // Льдины
+    CX.fillStyle='rgba(255,255,255,0.6)';
+    for(let ix=0;ix<W;ix+=60){
+      CX.beginPath(); CX.ellipse(ix+30,groundY+5,25,8,0,0,Math.PI*2); CX.fill();
+    }
+    CX.globalAlpha=1;
+    CX.restore();
+  }
+}
+
+// Пальмы в море-биоме (рисуются на горизонте)
+function drawPalms(){
+  if(biome!==2) return;
+  const blend = getBiomeBlend();
+  CX.save(); CX.globalAlpha = blend*0.7;
+  // Статичные пальмы — двигаются медленно
+  [W*0.1, W*0.35, W*0.65, W*0.9].forEach((px, pi)=>{
+    const py = H*0.72;
+    const sway = Math.sin(Date.now()/1200 + pi)*4;
+    // ствол
+    CX.strokeStyle='#8b5e3c'; CX.lineWidth=5;
+    CX.beginPath(); CX.moveTo(px,py); CX.quadraticCurveTo(px+sway*2,py-30,px+sway,py-60); CX.stroke();
+    // листья
+    CX.strokeStyle='#2d8a3e'; CX.lineWidth=3;
+    for(let li=0;li<6;li++){
+      const angle = (li/6)*Math.PI*2 + sway*0.05;
+      const lx = px+sway + Math.cos(angle)*28;
+      const ly = py-60 + Math.sin(angle)*14;
+      CX.beginPath(); CX.moveTo(px+sway,py-60); CX.quadraticCurveTo(lx-Math.cos(angle)*10,ly,lx,ly); CX.stroke();
+    }
+  });
+  CX.globalAlpha=1; CX.restore();
+}
+
+// Снег в арктике — переопределяем поведение погоды
+function spawnSnow(){
+  rainDrops.push({
+    x: Math.random()*W*1.2,
+    y: -10,
+    vx: (Math.random()-0.5)*0.8,
+    vy: 1.5 + Math.random()*2,
+    len: 3, // маленькие снежинки
+    alpha: 0.5 + Math.random()*0.4,
+    snow: true
+  });
+}
+
+function drawSky(){
+  const bm=getBiome(), bl=getBiomeBlend();
+  // Базовые палитры неба для каждого биома
+  const skyPal = [
+    { N:[[8,6,22],[12,10,35]], D:[[60,20,60],[100,30,80]], Y:[[28,95,185],[95,172,245]], S:[[75,28,18],[170,75,28]] }, // горы
+    { N:[[20,10,5],[30,15,8]], D:[[80,40,10],[130,70,20]], Y:[[80,130,200],[150,200,240]], S:[[120,60,10],[200,120,30]] }, // пустыня
+    { N:[[5,10,30],[8,15,45]], D:[[20,50,100],[40,80,150]], Y:[[30,100,190],[80,160,230]], S:[[60,20,15],[140,60,20]] }, // море
+    { N:[[10,20,40],[15,28,55]], D:[[40,60,90],[70,100,140]], Y:[[80,130,180],[130,175,220]], S:[[50,30,15],[100,60,25]] }, // арктика
+  ];
+  const p = skyPal[bm], pp = skyPal[prevBiome];
+  function blendSkyPal(key){ return { top: p[key][0].map((v,i)=>Math.round(v*bl+pp[key][0][i]*(1-bl))), bot: p[key][1].map((v,i)=>Math.round(v*bl+pp[key][1][i]*(1-bl))) }; }
+  const N=blendSkyPal('N'), D=blendSkyPal('D'), Y=blendSkyPal('Y'), S=blendSkyPal('S');
+  let top,bot; const c=cycleDayNight;
+  if(c<.25){const t=c/.25;       top=lp3(N.top,D.top,t);bot=lp3(N.bot,D.bot,t);}
+  else if(c<.5){const t=(c-.25)/.25; top=lp3(D.top,Y.top,t);bot=lp3(D.bot,Y.bot,t);}
+  else if(c<.75){const t=(c-.5)/.25;  top=lp3(Y.top,S.top,t);bot=lp3(Y.bot,S.bot,t);}
+  else{const t=(c-.75)/.25;           top=lp3(S.top,N.top,t);bot=lp3(S.bot,N.bot,t);}
+  if(lightFlash>0){const f=lightFlash/12;top=lp3(top,[230,235,255],f*.8);bot=lp3(bot,[190,210,255],f*.6);}
+  const g=CX.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,`rgb(${top})`); g.addColorStop(1,`rgb(${bot})`);
+  CX.fillStyle=g; CX.fillRect(0,0,W,H);
+}
+
+function drawStars(){
+  const al=cycleDayNight<.3?1:cycleDayNight<.5?1-(cycleDayNight-.3)/.2:0;
+  if(al<=0) return;
+  stars.forEach(s=>{
+    s.tw+=.035;
+    CX.globalAlpha=al*(.4+Math.sin(s.tw)*.6);
+    CX.fillStyle='#fff';
+    if(s.r>0){CX.beginPath(); CX.arc(s.x,s.y,s.r,0,Math.PI*2); CX.fill();}
+  });
+  CX.globalAlpha=1;
+}
+
+function drawCelestial(){
+  const sx=W*.82, c=cycleDayNight;
+  const sy=H*.13+Math.sin(c*Math.PI*2)*H*.08;
+  if(c>.18&&c<.82){
+    const op=c<.28?(c-.18)/.1:c>.72?1-(c-.72)/.1:1;
+    CX.globalAlpha=op;
+    const sg=CX.createRadialGradient(sx,sy,0,sx,sy,55);
+    sg.addColorStop(0,'rgba(255,255,195,1)'); sg.addColorStop(.45,'rgba(255,215,45,.75)'); sg.addColorStop(1,'rgba(255,140,0,0)');
+    CX.fillStyle=sg; CX.beginPath(); CX.arc(sx,sy,55,0,Math.PI*2); CX.fill();
+    CX.globalAlpha=1;
+  } else {
+    const ma=c<.1?1-c/.1:c>.9?(c-.9)/.1:1;
+    CX.globalAlpha=Math.max(0,ma);
+    CX.fillStyle='#ddeeff'; CX.beginPath(); CX.arc(sx,sy,20,0,Math.PI*2); CX.fill();
+    CX.fillStyle='rgba(140,170,210,.55)'; CX.beginPath(); CX.arc(sx+7,sy-4,16,0,Math.PI*2); CX.fill();
+    CX.globalAlpha=1;
+  }
+}
+
+function drawMountains(){
+  const c=cycleDayNight;
+  // Цвета гор зависят от биома
+  const bm=getBiome(), bl=getBiomeBlend();
+  const mountainPalettes = [
+    [[18,28,55],[75,55,75],[38,18,28]], // горы — синие/фиолетовые
+    [[120,80,20],[180,130,50],[100,60,10]], // пустыня — песок/охра
+    [[10,30,70],[20,60,120],[8,20,50]],  // море — тёмно-синие
+    [[100,130,160],[150,180,210],[80,110,140]], // арктика — серо-голубые
+  ];
+  const prevP = mountainPalettes[prevBiome], curP = mountainPalettes[bm];
+  function blendPal(i){ return [0,1,2].map(j=>Math.round(prevP[i][j]*(1-bl)+curP[i][j]*bl)); }
+  const cols=[
+    c<.5?lp3(blendPal(0),blendPal(1),c*2):lp3(blendPal(1),blendPal(2),(c-.5)*2),
+    c<.5?lp3(blendPal(0).map(v=>Math.round(v*.85)),blendPal(1).map(v=>Math.round(v*.85)),c*2):lp3(blendPal(1).map(v=>Math.round(v*.85)),blendPal(2).map(v=>Math.round(v*.85)),(c-.5)*2),
+    c<.5?lp3(blendPal(0).map(v=>Math.round(v*.7)),blendPal(1).map(v=>Math.round(v*.7)),c*2):lp3(blendPal(1).map(v=>Math.round(v*.7)),blendPal(2).map(v=>Math.round(v*.7)),(c-.5)*2),
+  ];
+  mountains.forEach((m,li)=>{
+    const spd=m.sp*(SPEED/3)*.14*DT;
+    m.pts.forEach(p=>p.x-=spd);
+    if(m.pts[0].x<-W/m.pts.length*2){
+      const last=m.pts[m.pts.length-1];
+      m.pts.shift();
+      m.pts.push({x:last.x+W/10,y:H*(.52+li*.13)-Math.random()*H*(.18-li*.04)});
+    }
+    CX.fillStyle=`rgb(${cols[li]})`;
+    CX.beginPath(); CX.moveTo(0,H);
+    m.pts.forEach(p=>CX.lineTo(p.x,p.y));
+    CX.lineTo(W,H); CX.closePath(); CX.fill();
+    if(li===0){
+      CX.fillStyle=`rgba(255,255,255,${.12+c*.08})`;
+      m.pts.forEach((p,i)=>{
+        if(i===0||i===m.pts.length-1)return;
+        CX.beginPath(); CX.moveTo(p.x-14,p.y+16); CX.lineTo(p.x,p.y); CX.lineTo(p.x+14,p.y+16); CX.closePath(); CX.fill();
+      });
+    }
+  });
+}
+
+function drawClouds(){
+  clouds.forEach(cl=>{
+    cl.x-=cl.sp*(SPEED/3)*DT;
+    if(cl.x<-180){cl.x=W+130;cl.y=30+Math.random()*H*.35;}
+    CX.globalAlpha=.06+cycleDayNight*.11; CX.fillStyle='#fff';
+    var cr1=Math.max(0,46*cl.s),cr2=Math.max(0,32*cl.s);
+    [-1,0,1].forEach(d=>{ CX.beginPath(); CX.arc(cl.x+d*38*cl.s,cl.y,cr1,0,Math.PI*2); CX.fill(); });
+    CX.beginPath(); CX.arc(cl.x,cl.y-22*cl.s,cr2,0,Math.PI*2); CX.fill();
+    CX.globalAlpha=1;
+  });
+}
+
+function drawPipes(){
+  const night=cycleDayNight<.25||cycleDayNight>.75;
+  pipes.forEach(p=>{
+    const py=p.top?0:H-p.h;
+    const rg=CX.createLinearGradient(p.x,0,p.x+p.w,0);
+    if(night){rg.addColorStop(0,'#0b1824');rg.addColorStop(.5,'#162433');rg.addColorStop(1,'#081018');}
+    else{rg.addColorStop(0,'#18182a');rg.addColorStop(.5,'#282840');rg.addColorStop(1,'#101020');}
+    CX.fillStyle=rg;
+    rrect(CX,p.x,py,p.w,p.h,p.top?[0,0,10,10]:[10,10,0,0]); CX.fill();
+    const nc=night?'#3498db':'#7c4dff';
+    CX.strokeStyle=nc; CX.lineWidth=2; CX.shadowBlur=night?14:6; CX.shadowColor=nc;
+    rrect(CX,p.x,py,p.w,p.h,p.top?[0,0,10,10]:[10,10,0,0]); CX.stroke();
+    CX.shadowBlur=0;
+    CX.fillStyle=nc; CX.globalAlpha=.65;
+    if(p.top) CX.fillRect(p.x,p.h-5,p.w,5); else CX.fillRect(p.x,H-p.h,p.w,5);
+    CX.globalAlpha=1;
+  });
+}
+
+// ══════════════════════════════════════════
+// РИСОВАНИЕ ОТСЧЁТА И "TAP" НА CANVAS
+// ══════════════════════════════════════════
+function drawOverlayCanvas(){
+  const cx=W/2, cy=H/2;
+
+  if(STATE==='countdown'){
+    // Полупрозрачный фон
+    CX.fillStyle='rgba(0,0,0,.45)';
+    CX.fillRect(0,0,W,H);
+    // Большое число
+    const sz=Math.min(W,H)*.28;
+    CX.font=`900 ${sz}px Arial, sans-serif`;
+    CX.textAlign='center';
+    CX.textBaseline='middle';
+    // Тень-свечение
+    CX.shadowBlur=60; CX.shadowColor='rgba(241,196,15,.9)';
+    CX.fillStyle='#f1c40f';
+    CX.fillText(String(cdNum), cx, cy);
+    CX.shadowBlur=0;
+    // Подпись птицы снизу
+    const bdef=BIRDS[birdIdx];
+    CX.font=`700 ${Math.min(W,H)*.04}px Arial, sans-serif`;
+    CX.fillStyle='rgba(255,255,255,.55)';
+    CX.fillText(bdef.emoji+' '+bdef.name, cx, cy+sz*.72);
+    // Маленький текст «нажми чтобы пропустить»
+    CX.font=`400 ${Math.min(W,H)*.025}px Arial, sans-serif`;
+    CX.fillStyle='rgba(255,255,255,.25)';
+    CX.fillText('нажми чтобы пропустить', cx, cy+sz*.72+Math.min(W,H)*.055);
+    CX.textAlign='left'; CX.textBaseline='alphabetic';
+    return;
+  }
+
+  if(STATE==='ready'){
+    // Мигающая подсказка
+    tapBlink += .05;
+    const alpha = .45+Math.sin(tapBlink)*0.55;
+    const fontSize = Math.min(W,H)*.055;
+    const text = '👆  НАЖМИ ЧТОБЫ ЛЕТЕТЬ';
+    CX.font=`700 ${fontSize}px Arial, sans-serif`;
+    CX.textAlign='center';
+    CX.textBaseline='middle';
+    // Плашка
+    const tw=CX.measureText(text).width;
+    const ph=fontSize*1.5, pw2=tw+fontSize*1.2;
+    const bx=cx-pw2/2, by=cy-ph/2;
+    CX.fillStyle=`rgba(0,0,0,${alpha*.65})`;
+    rrect(CX,bx,by,pw2,ph,ph/2); CX.fill();
+    CX.strokeStyle=`rgba(255,255,255,${alpha*.4})`;
+    CX.lineWidth=1.5;
+    rrect(CX,bx,by,pw2,ph,ph/2); CX.stroke();
+    CX.globalAlpha=alpha;
+    CX.fillStyle='#fff';
+    CX.shadowBlur=18; CX.shadowColor='rgba(255,255,255,.6)';
+    CX.fillText(text, cx, cy);
+    CX.shadowBlur=0; CX.globalAlpha=1;
+    // Имя птицы под надписью
+    const bdef=BIRDS[birdIdx];
+    CX.font=`600 ${fontSize*.55}px Arial, sans-serif`;
+    CX.fillStyle='rgba(255,255,255,.4)';
+    CX.fillText(bdef.emoji+' '+bdef.name, cx, cy+fontSize*1.3);
+    CX.textAlign='left'; CX.textBaseline='alphabetic';
+  }
+}
+
+// ══════════════════════════════════════════
+// РИСОВАНИЕ ПТИЦЫ
+// ══════════════════════════════════════════
+function drawBird(){
+  const b=BIRDS[birdIdx];
+  const sc=Math.min(W,H)/520;
+  CX.save();
+  CX.translate(bird.x,bird.y);
+  const angle=Math.min(Math.PI/5,Math.max(-Math.PI/4,bird.v*.07));
+  CX.rotate(angle);
+  if(b.aura){CX.shadowBlur=18;CX.shadowColor=b.aura;}
+  if(combo>=3){CX.shadowBlur=28;CX.shadowColor='#f1c40f';}
+  CX.scale(sc,sc);
+  const wf=Math.sin(bird.wing)*22;
+  CX.fillStyle=b.wing;
+  CX.beginPath(); CX.moveTo(-18,2); CX.quadraticCurveTo(0,-wf-24,18,2); CX.fill();
+  CX.strokeStyle=b.body; CX.lineWidth=1; CX.globalAlpha=.4;
+  for(let f=1;f<=3;f++){
+    CX.beginPath(); CX.moveTo(-18+f*9,2);
+    CX.quadraticCurveTo(-14+f*9,-wf*.5-f*3,-14+f*9,2); CX.stroke();
+  }
+  CX.globalAlpha=1;
+  CX.fillStyle=b.body;
+  CX.beginPath(); CX.ellipse(0,0,25,10,0,0,Math.PI*2); CX.fill();
+  CX.fillStyle=b.head; CX.shadowBlur=0;
+  CX.beginPath(); CX.arc(17,-4,10,0,Math.PI*2); CX.fill();
+  CX.fillStyle=b.beak;
+  CX.beginPath(); CX.moveTo(24,-4); CX.lineTo(36,-1); CX.lineTo(24,2); CX.fill();
+  CX.fillStyle=b.eye;
+  CX.beginPath(); CX.arc(20,-5,3,0,Math.PI*2); CX.fill();
+  CX.fillStyle='#fff'; CX.beginPath(); CX.arc(21,-5.8,1.2,0,Math.PI*2); CX.fill();
+  CX.fillStyle=b.wing;
+  CX.beginPath(); CX.moveTo(-23,0); CX.lineTo(-35,-7); CX.lineTo(-27,3);  CX.fill();
+  CX.beginPath(); CX.moveTo(-23,2); CX.lineTo(-33,10); CX.lineTo(-26,5);  CX.fill();
+  CX.beginPath(); CX.moveTo(-23,1); CX.lineTo(-36,2);  CX.lineTo(-27,4);  CX.fill();
+  if(b.id==='phoenix'){
+    CX.globalAlpha=.7;
+    ['#ff6b35','#f1c40f','#e74c3c'].forEach((col,ci)=>{
+      CX.fillStyle=col;
+      CX.beginPath();
+      CX.moveTo(-23+ci*3,ci*2);
+      CX.quadraticCurveTo(-30+ci*2,-9-Math.sin(frame*.14+ci)*7,-35+ci*3,-4+ci);
+      CX.quadraticCurveTo(-28+ci,-2+Math.cos(frame*.14+ci)*4,-23+ci*3,ci*2);
+      CX.fill();
+    });
+    CX.globalAlpha=1;
+  }
+  CX.restore();
+  // Щит — синяя аура
+  if(activeShield>0){
+    CX.save();
+    CX.strokeStyle='#3498db'; CX.lineWidth=3;
+    CX.shadowBlur=20; CX.shadowColor='#3498db';
+    CX.globalAlpha=0.6+Math.sin(frame*.15)*.4;
+    const sc2=Math.min(W,H)/520;
+    CX.beginPath(); CX.ellipse(bird.x,bird.y,32*sc2,18*sc2,0,0,Math.PI*2); CX.stroke();
+    CX.shadowBlur=0; CX.globalAlpha=1;
+    CX.restore();
+  }
+  // Призрак — синеватая прозрачность (рисуется выше, тут ничего)
+  // Пушка — красная аура
+  if(activeGun>0){
+    CX.save();
+    CX.strokeStyle='#e74c3c'; CX.lineWidth=2;
+    CX.shadowBlur=16; CX.shadowColor='#e74c3c';
+    CX.globalAlpha=0.5+Math.sin(frame*.2)*.5;
+    const sc3=Math.min(W,H)/520;
+    CX.beginPath(); CX.ellipse(bird.x,bird.y,38*sc3,22*sc3,0,0,Math.PI*2); CX.stroke();
+    CX.shadowBlur=0; CX.globalAlpha=1;
+    CX.restore();
+  }
+  trails.push({x:bird.x-10,y:bird.y,r:5,life:1});
+  if(trails.length>20) trails.shift();
+  trails.forEach(t=>t.life-=.06);
+  trails=trails.filter(t=>t.life>0);
+  trails.forEach(t=>{
+    CX.globalAlpha=t.life*.45; CX.fillStyle=b.trail;
+    var tr=t.r*t.life; if(tr>0){CX.beginPath(); CX.arc(t.x,t.y,tr,0,Math.PI*2); CX.fill();}
+  });
+  CX.globalAlpha=1;
+}
+
+function drawParticles(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx*DT; p.y+=p.vy*DT; p.vy+=.08*DT;
+    p.life-=.03*DT; p.r*=Math.pow(.96,DT);
+    if(p.life<=0){particles.splice(i,1);continue;}
+    CX.globalAlpha=p.life; CX.fillStyle=p.col;
+    if(p.r>0){CX.beginPath(); CX.arc(p.x,p.y,p.r,0,Math.PI*2); CX.fill();}
+  }
+  CX.globalAlpha=1;
+}
+
+// ══════════════════════════════════════════
+// ПРЕДПРОСМОТР ПТИЦЫ В МЕНЮ
+
+// ══════════════════════════════════════════
+// СИСТЕМА ПРОКАЧКИ ПТИЦ
+// ══════════════════════════════════════════
+// Навыки прокачки — у каждой птицы своих 4 навыка
+// levels: текущий уровень 0..maxLvl
+// cost[i]: цена i-го уровня
+// effect: описание каждого уровня
+
+const UPGRADE_DEFS = {
+  eagle: [
+    { id:'jump',  icon:'🦘', name:'МАНЁВРЕННОСТЬ',   desc:'Прыжок становится выше и точнее',
+      maxLvl:5, costs:[30,50,80,120,200],
+      vals:[1.0,1.12,1.22,1.32,1.42,1.55], valDesc:['базовый','×1.12','×1.22','×1.32','×1.42','×1.55 МАКС'] },
+    { id:'hitbox',icon:'🎯', name:'МАЛЫЙ ХИТБОКС',   desc:'Уменьшает зону столкновения',
+      maxLvl:4, costs:[40,70,110,180],
+      vals:[1.0,0.9,0.8,0.7,0.6], valDesc:['×1.0','×0.9','×0.8','×0.7','×0.6 МАКС'] },
+    { id:'coin',  icon:'💰', name:'ЗОЛОТОЕ ЧУТЬЁ',   desc:'Монеты летят к птице сами',
+      maxLvl:3, costs:[60,100,160],
+      vals:[0,30,60,100], valDesc:['нет','радиус 30','радиус 60','радиус 100 МАКС'] },
+    { id:'grav',  icon:'🌊', name:'ЛЁГКОСТЬ ПОЛЁТА', desc:'Снижает гравитацию',
+      maxLvl:4, costs:[35,60,95,150],
+      vals:[1.0,0.92,0.85,0.78,0.72], valDesc:['×1.0','×0.92','×0.85','×0.78','×0.72 МАКС'] },
+  ],
+  phoenix: [
+    { id:'gunDur',icon:'🔥', name:'ДЛИНА ОГНЯ',      desc:'Увеличивает время пушки',
+      maxLvl:5, costs:[30,50,80,120,200],
+      vals:[1.0,1.3,1.6,2.0,2.5,3.0], valDesc:['×1','×1.3','×1.6','×2.0','×2.5','×3.0 МАКС'] },
+    { id:'jump',  icon:'🦘', name:'ОГНЕННЫЙ ПРЫЖОК', desc:'Прыжок выше + частицы огня',
+      maxLvl:4, costs:[40,70,110,180],
+      vals:[1.0,1.1,1.2,1.3,1.4], valDesc:['базовый','×1.1','×1.2','×1.3','×1.4 МАКС'] },
+    { id:'explode',icon:'💣',name:'ОГНЕННЫЙ ЗАРЯД',desc:'При столкновении с трубой — взрывает её (не умираешь)',
+      maxLvl:3, costs:[80,140,220],
+      vals:[0,1,2,3], valDesc:['нет','1 заряд','2 заряда','3 заряда МАКС'] },
+    { id:'coin',  icon:'💰', name:'ПЕПЕЛ В ЗОЛОТО',  desc:'Монеты за уничтожение трубы пушкой',
+      maxLvl:3, costs:[50,90,140],
+      vals:[0,1,2,3], valDesc:['нет','+1 монета','+2 монеты','+3 монеты МАКС'] },
+  ],
+  raven: [
+    { id:'ghostDur',icon:'👻',name:'ДЛИНА ПРИЗРАКА', desc:'Увеличивает время невидимости',
+      maxLvl:5, costs:[30,50,80,120,200],
+      vals:[1.0,1.3,1.6,2.0,2.5,3.0], valDesc:['×1','×1.3','×1.6','×2.0','×2.5','×3.0 МАКС'] },
+    { id:'hitbox',icon:'🌑', name:'ТЕНЬ',            desc:'Хитбокс ещё меньше в ночное время',
+      maxLvl:4, costs:[40,70,110,180],
+      vals:[1.0,0.88,0.78,0.68,0.58], valDesc:['×1.0','×0.88','×0.78','×0.68','×0.58 МАКС'] },
+    { id:'jump',  icon:'🌪️', name:'ВИХРЬ',          desc:'Прыжок и падение быстрее — точнее',
+      maxLvl:3, costs:[50,90,150],
+      vals:[1.0,1.15,1.28,1.4], valDesc:['базовый','×1.15','×1.28','×1.4 МАКС'] },
+    { id:'coin',  icon:'💎', name:'ТЕНЕВОЙ ГРАБЁЖ',  desc:'Монеты во время призрака стоят больше',
+      maxLvl:3, costs:[60,110,180],
+      vals:[1,2,3,4], valDesc:['×1','×2','×3','×4 МАКС'] },
+  ],
+  falcon: [
+    { id:'jump',  icon:'🎯', name:'ТОЧНОСТЬ',        desc:'Прыжок максимально точный',
+      maxLvl:5, costs:[25,45,70,110,170],
+      vals:[1.05,1.12,1.19,1.26,1.33,1.4], valDesc:['×1.05','×1.12','×1.19','×1.26','×1.33','×1.4 МАКС'] },
+    { id:'grav',  icon:'⚡', name:'ПИКИРОВАНИЕ',     desc:'Ускоряет падение для резких манёвров',
+      maxLvl:4, costs:[35,60,95,150],
+      vals:[0.9,0.82,0.75,0.68,0.62], valDesc:['×0.9','×0.82','×0.75','×0.68','×0.62 МАКС'] },
+    { id:'hitbox',icon:'🔵', name:'АЭРОДИНАМИКА',    desc:'Минимальный хитбокс сокола',
+      maxLvl:4, costs:[45,80,125,200],
+      vals:[0.9,0.8,0.72,0.64,0.56], valDesc:['×0.9','×0.8','×0.72','×0.64','×0.56 МАКС'] },
+    { id:'coin',  icon:'🏅', name:'ОХОТНИК',         desc:'Монеты притягиваются к соколу',
+      maxLvl:3, costs:[55,95,160],
+      vals:[0,40,75,120], valDesc:['нет','радиус 40','радиус 75','радиус 120 МАКС'] },
+  ],
+  parrot: [
+    { id:'slowDur',icon:'⏳',name:'ВЕЧНОЕ ЗАМЕДЛ.',  desc:'Увеличивает время замедления',
+      maxLvl:5, costs:[30,50,80,120,200],
+      vals:[1.0,1.3,1.6,2.0,2.5,3.0], valDesc:['×1','×1.3','×1.6','×2.0','×2.5','×3.0 МАКС'] },
+    { id:'jump',  icon:'🦜', name:'ПОПУГАЙСКИЙ ПОЛЁТ',desc:'Лёгкий быстрый прыжок',
+      maxLvl:4, costs:[40,70,110,180],
+      vals:[0.95,1.05,1.15,1.24,1.32], valDesc:['×0.95','×1.05','×1.15','×1.24','×1.32 МАКС'] },
+    { id:'coin',  icon:'🍀', name:'УДАЧА',           desc:'Больше монет во время замедления',
+      maxLvl:3, costs:[50,90,150],
+      vals:[1,2,3,5], valDesc:['×1','×2','×3','×5 МАКС'] },
+    { id:'grav',  icon:'🌈', name:'ПОРХАНИЕ',        desc:'Плавное снижение гравитации',
+      maxLvl:4, costs:[40,70,110,175],
+      vals:[1.0,0.93,0.86,0.80,0.74], valDesc:['×1.0','×0.93','×0.86','×0.80','×0.74 МАКС'] },
+  ],
+  storm: [
+    { id:'shieldDur',icon:'⛈️',name:'МОЩЬ ЩИТА',    desc:'Увеличивает время щита',
+      maxLvl:5, costs:[30,50,80,120,200],
+      vals:[1.0,1.3,1.6,2.0,2.5,3.0], valDesc:['×1','×1.3','×1.6','×2.0','×2.5','×3.0 МАКС'] },
+    { id:'shieldHits',icon:'🛡',name:'МНОГОУДАР',    desc:'Щит выдерживает несколько ударов',
+      maxLvl:3, costs:[100,180,280],
+      vals:[1,2,3,4], valDesc:['1 удар','2 удара','3 удара','4 удара МАКС'] },
+    { id:'jump',  icon:'🌩️', name:'БУРЕВОЙ ВЗЛЁТ',  desc:'Мощный прыжок сквозь ветер',
+      maxLvl:4, costs:[40,70,110,180],
+      vals:[1.0,1.1,1.2,1.3,1.4], valDesc:['×1.0','×1.1','×1.2','×1.3','×1.4 МАКС'] },
+    { id:'coin',  icon:'⚡', name:'РАЗРЯД',          desc:'Монеты при активном щите × бонус',
+      maxLvl:3, costs:[60,110,175],
+      vals:[1,2,3,4], valDesc:['×1','×2','×3','×4 МАКС'] },
+  ],
+  ice: [
+    { id:'hitbox',icon:'❄️', name:'ЛЕДЯНОЕ ТЕЛО',    desc:'Сверхмалый хитбокс',
+      maxLvl:5, costs:[25,45,70,110,170],
+      vals:[0.7,0.62,0.54,0.46,0.4,0.34], valDesc:['×0.7','×0.62','×0.54','×0.46','×0.40','×0.34 МАКС'] },
+    { id:'slowDur',icon:'🧊',name:'ВЕЧНАЯ ЗИМА',     desc:'Замедление длится дольше',
+      maxLvl:4, costs:[35,60,95,150],
+      vals:[1.0,1.35,1.7,2.1,2.6], valDesc:['×1.0','×1.35','×1.7','×2.1','×2.6 МАКС'] },
+    { id:'jump',  icon:'🏔️', name:'ЛЕДЯНОЙ ПРЫЖОК', desc:'Скользкий стремительный взлёт',
+      maxLvl:4, costs:[40,70,110,180],
+      vals:[1.05,1.16,1.27,1.38,1.5], valDesc:['×1.05','×1.16','×1.27','×1.38','×1.5 МАКС'] },
+    { id:'coin',  icon:'💠', name:'ХРУСТАЛЬНЫЙ ЛЁД', desc:'Монеты замораживаются и стоят дороже',
+      maxLvl:3, costs:[55,95,155],
+      vals:[1,2,3,4], valDesc:['×1','×2','×3','×4 МАКС'] },
+  ],
+  golden: [
+    { id:'allBonus',icon:'👑',name:'КОРОЛЕВСКИЙ ДАР', desc:'Все навыки работают дольше',
+      maxLvl:5, costs:[50,90,140,210,320],
+      vals:[1.0,1.2,1.4,1.7,2.1,2.6], valDesc:['×1.0','×1.2','×1.4','×1.7','×2.1','×2.6 МАКС'] },
+    { id:'coin',  icon:'✨', name:'ЗОЛОТОЕ ПРИКОСНОВЕНИЕ',desc:'Монеты стоят намного больше',
+      maxLvl:4, costs:[60,110,170,260],
+      vals:[1,2,3,5,8], valDesc:['×1','×2','×3','×5','×8 МАКС'] },
+    { id:'hitbox',icon:'🌟', name:'НЕУЯЗВИМОСТЬ',    desc:'Золотой ореол уменьшает хитбокс',
+      maxLvl:4, costs:[55,95,150,240],
+      vals:[0.8,0.72,0.64,0.56,0.48], valDesc:['×0.8','×0.72','×0.64','×0.56','×0.48 МАКС'] },
+    { id:'jump',  icon:'🦅', name:'ЗОЛОТЫЕ КРЫЛЬЯ',  desc:'Прыжок лёгкий как перо',
+      maxLvl:4, costs:[45,80,125,200],
+      vals:[1.1,1.22,1.34,1.46,1.6], valDesc:['×1.1','×1.22','×1.34','×1.46','×1.6 МАКС'] },
+  ],
+};
+
+const UPG_SAVE_KEY = 'buria_upgrades_v1';
+function getUpgrades(){
+  try{ return JSON.parse(localStorage.getItem(UPG_SAVE_KEY)||'{}'); }catch(e){ return {}; }
+}
+function saveUpgrades(u){ localStorage.setItem(UPG_SAVE_KEY, JSON.stringify(u)); }
+
+function getSkillLevel(birdId, skillId){
+  const u = getUpgrades();
+  return (u[birdId]&&u[birdId][skillId]) || 0;
+}
+function setSkillLevel(birdId, skillId, lvl){
+  const u = getUpgrades();
+  if(!u[birdId]) u[birdId]={};
+  u[birdId][skillId]=lvl;
+  saveUpgrades(u);
+}
+
+// Получить реальное значение навыка для текущей птицы
+function getBirdStat(birdId, statId, defaultVal){
+  const defs = UPGRADE_DEFS[birdId];
+  if(!defs) return defaultVal;
+  const def = defs.find(d=>d.id===statId);
+  if(!def) return defaultVal;
+  const lvl = getSkillLevel(birdId, statId);
+  return def.vals[lvl];
+}
+
+// Применяем прокачку к реальным параметрам птицы в полёте
+function getBirdJumpM(birdId){
+  const base = BIRDS.find(b=>b.id===birdId).jumpM;
+  const upg  = getBirdStat(birdId,'jump',1.0);
+  return base * upg;
+}
+function getBirdGravM(birdId){
+  const base = BIRDS.find(b=>b.id===birdId).gravM;
+  const upg  = getBirdStat(birdId,'grav',1.0);
+  return base * upg;
+}
+function getBirdHitM(birdId){
+  const base = BIRDS.find(b=>b.id===birdId).hitM;
+  const upg  = getBirdStat(birdId,'hitbox',1.0);
+  return base * upg;
+}
+function getBirdCoinRadius(birdId){
+  return getBirdStat(birdId,'coin',0);
+}
+
+// ── Открыть экран прокачки ──
+let upgradeAnimFrame = null;
+let upgParticles = [];
+
+function openUpgrade(idx){
+  const b = BIRDS[idx];
+  document.getElementById('upg-title').textContent = b.emoji+' ПРОКАЧКА';
+  document.getElementById('upg-bname').textContent = b.name;
+  document.getElementById('upg-bskill').textContent = b.skillIcon+' '+b.skill;
+  document.getElementById('upg-coins').textContent = '💰 '+getTotalCoins();
+
+  // Превью птицы
+  const cv = document.getElementById('upg-preview');
+  drawPreview(b, cv, false);
+
+  // Рендер навыков
+  renderUpgradeSkills(idx);
+  hideEl('menu');
+  showEl('upgrade-screen');
+
+  // Анимация частиц в превью
+  startUpgradeAnim(cv, b);
+}
+
+function closeUpgrade(){
+  if(upgradeAnimFrame){ cancelAnimationFrame(upgradeAnimFrame); upgradeAnimFrame=null; }
+  hideEl('upgrade-screen');
+  buildSelector();
+  showEl('menu');
+}
+
+function renderUpgradeSkills(idx){
+  const b = BIRDS[idx];
+  const defs = UPGRADE_DEFS[b.id] || [];
+  const container = document.getElementById('upg-skills');
+  container.innerHTML='';
+
+  defs.forEach((def,di)=>{
+    const lvl = getSkillLevel(b.id, def.id);
+    const maxed = lvl >= def.maxLvl;
+    const cost  = maxed ? 0 : def.costs[lvl];
+    const canAfford = getTotalCoins() >= cost;
+
+    const card = document.createElement('div');
+    card.className = 'upg-skill'+(maxed?' maxed':'');
+    card.id = 'upg-skill-'+di;
+
+    // Полоса прогресса (анимированная)
+    const pct = (lvl/def.maxLvl*100);
+    const dotHtml = Array.from({length:def.maxLvl},(_,i)=>
+      `<div class="upg-lvl-dot${i<lvl?' filled'+(maxed?' maxed':''):''}"></div>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="upg-skill-header">
+        <div class="upg-skill-icon">${def.icon}</div>
+        <div class="upg-skill-name">${def.name}</div>
+        <div class="upg-skill-cost ${maxed?'maxed':''}">${maxed?'✅ МАКС':(!canAfford?'<span style="color:rgba(255,100,100,.8)">💰'+cost+'</span>':'💰'+cost)}</div>
+      </div>
+      <div class="upg-skill-desc">${def.desc} — сейчас: <b style="color:#f1c40f">${def.valDesc[lvl]}</b>${!maxed?', след: <span style="color:#2ecc71">'+def.valDesc[lvl+1]+'</span>':''}</div>
+      <div class="upg-skill-bar"><div class="upg-skill-bar-fill${maxed?' maxed':''}" style="width:${pct}%"></div></div>
+      <div class="upg-skill-levels">${dotHtml}</div>
+    `;
+
+    if(!maxed){
+      card.onclick = ()=> buyUpgrade(idx, di, card);
+    }
+    container.appendChild(card);
+
+    // Анимируем полосу через небольшую задержку
+    setTimeout(()=>{
+      const bar = card.querySelector('.upg-skill-bar-fill');
+      if(bar){ bar.style.width='0%'; setTimeout(()=>{ bar.style.width=pct+'%'; },50+di*80); }
+    },10);
+  });
+}
+
+function buyUpgrade(birdIdx2, defIdx, card){
+  const b    = BIRDS[birdIdx2];
+  const def  = UPGRADE_DEFS[b.id][defIdx];
+  const lvl  = getSkillLevel(b.id, def.id);
+  if(lvl >= def.maxLvl) return;
+  const cost = def.costs[lvl];
+  if(getTotalCoins() < cost){ shakeCard(card); return; }
+
+  // Снимаем монеты и повышаем уровень
+  addCoins(-cost);
+  setSkillLevel(b.id, def.id, lvl+1);
+
+  // Вспышка на карточке
+  const flash = document.createElement('div');
+  flash.className='upg-flash';
+  card.appendChild(flash);
+  setTimeout(()=>flash.remove(),600);
+
+  // Обновляем UI
+  document.getElementById('upg-coins').textContent = '💰 '+getTotalCoins();
+  renderUpgradeSkills(birdIdx2);
+}
+
+function shakeCard(card){
+  card.style.transition='none';
+  card.style.transform='translateX(-8px)';
+  setTimeout(()=>{ card.style.transform='translateX(6px)'; },80);
+  setTimeout(()=>{ card.style.transform='translateX(-4px)'; },160);
+  setTimeout(()=>{ card.style.transform='translateX(0)'; card.style.transition='all .2s'; },240);
+}
+
+function startUpgradeAnim(cv, b){
+  const c2 = cv.getContext('2d');
+  let t=0;
+  function anim(){
+    c2.clearRect(0,0,80,80);
+    // Аура пульсирует
+    if(b.aura){
+      c2.save();
+      c2.globalAlpha=0.3+Math.sin(t*.08)*0.2;
+      c2.shadowBlur=20+Math.sin(t*.06)*10; c2.shadowColor=b.aura;
+      c2.strokeStyle=b.aura; c2.lineWidth=2;
+      c2.beginPath(); c2.arc(40,40,28+Math.sin(t*.05)*3,0,Math.PI*2); c2.stroke();
+      c2.shadowBlur=0; c2.restore();
+    }
+    // Птица
+    c2.save(); c2.translate(40,40);
+    const wf = Math.sin(t*.12)*18;
+    c2.fillStyle=b.wing; c2.beginPath(); c2.moveTo(-18,0); c2.quadraticCurveTo(0,-wf-18,18,0); c2.fill();
+    c2.fillStyle=b.body; c2.beginPath(); c2.ellipse(0,0,22,9,0,0,Math.PI*2); c2.fill();
+    c2.fillStyle=b.head; c2.beginPath(); c2.arc(15,-4,9,0,Math.PI*2); c2.fill();
+    c2.fillStyle=b.beak; c2.beginPath(); c2.moveTo(22,-4); c2.lineTo(32,-1); c2.lineTo(22,2); c2.fill();
+    c2.fillStyle=b.eye;  c2.beginPath(); c2.arc(18,-5,2.5,0,Math.PI*2); c2.fill();
+    c2.fillStyle='#fff'; c2.beginPath(); c2.arc(19,-5.5,1,0,Math.PI*2); c2.fill();
+    c2.restore();
+    t++;
+    upgradeAnimFrame = requestAnimationFrame(anim);
+  }
+  if(upgradeAnimFrame) cancelAnimationFrame(upgradeAnimFrame);
+  anim();
+}
+
+function setDiff(n){
+  diffLevel = n;
+  for(let i=1;i<=5;i++){
+    const b=document.getElementById('diff-'+i);
+    if(b) b.classList.toggle('active', i===n);
+  }
+  recalcPhysics(); // применяем сразу
+}
+
+// ══════════════════════════════════════════
+function buildSelector(){
+  const grid=document.getElementById('sel-grid');
+  grid.innerHTML='';
+  const unl = getUnlocked();
+  if(birdIdx >= unl) birdIdx = 0;
+  BIRDS.forEach((b,i)=>{
+    const locked = i >= unl;
+    const div=document.createElement('div');
+    div.className='sel-card'+(i===birdIdx?' active':'')+(locked?' locked':'');
+    div.style.cursor = locked ? 'default' : 'pointer';
+    // Превью канвас
+    const cv=document.createElement('canvas'); cv.width=54; cv.height=54;
+    // Имя
+    const nm=document.createElement('div'); nm.className='cname'; nm.textContent=b.name;
+    // Навык или замок
+    const sk=document.createElement('div'); sk.className='ctag';
+    if(locked){
+      sk.textContent='🔒 через '+(i*50)+' труб';
+      sk.style.color='rgba(255,100,100,.6)';
     } else {
-        bird.v += GRAVITY;
-        bird.y += bird.v;
-        bird.wing += 0.15;
-
-        if(frame % 130 === 0) {
-            let gap = 260 - Math.min(score, 50); // Усложнение: просвет сужается
-            let th = 100 + Math.random() * (h - gap - 200);
-            pipes.push({x: w, w: 100, h: th, type: 'top', passed: false});
-            pipes.push({x: w, w: 100, h: h - th - gap, type: 'bot'});
-        }
-
-        pipes.forEach((p, i) => {
-            p.x -= SPEED + (score * 0.02); // Усложнение: скорость растет
-            if(bird.x + 18 > p.x && bird.x - 18 < p.x + p.w) {
-                if(p.type === 'top' && bird.y - 12 < p.h) die();
-                if(p.type === 'bot' && bird.y + 12 > h - p.h) die();
-            }
-            if(!p.passed && p.type === 'top' && p.x < bird.x) {
-                score++; p.passed = true;
-                scoreUI.innerText = score;
-            }
-            if(p.x < -120) pipes.splice(i, 1);
-        });
-
-        if(bird.y > h || bird.y < 0) die();
+      sk.textContent=b.skillIcon+' '+b.skill;
+      sk.style.fontSize='8px';
+      sk.style.color='rgba(255,255,255,.45)';
+      sk.style.lineHeight='1.2';
+      sk.style.marginTop='3px';
+      sk.style.whiteSpace='normal';
     }
-    frame++;
+    div.append(cv,nm,sk);
+    if(!locked){
+      const hint=document.createElement('div');
+      hint.style.cssText='font-size:8px;color:rgba(241,196,15,.5);margin-top:3px;letter-spacing:1px';
+      hint.textContent='✦ удержи → прокачка';
+      div.appendChild(hint);
+    }
+    if(!locked){
+      let pressTimer=null;
+      // Короткий клик — выбрать
+      // Долгое нажатие (400мс) или двойной клик — прокачка
+      div.ondblclick = ()=> openUpgrade(i);
+      div.onmousedown = div.ontouchstart = ()=>{
+        pressTimer=setTimeout(()=>{ pressTimer=null; openUpgrade(i); },500);
+      };
+      div.onmouseup = div.ontouchend = ()=>{
+        if(pressTimer){ clearTimeout(pressTimer); pressTimer=null;
+          document.querySelectorAll('.sel-card').forEach(c=>c.classList.remove('active'));
+          div.classList.add('active'); birdIdx=i;
+        }
+      };
+      div.onmouseleave = ()=>{ if(pressTimer){ clearTimeout(pressTimer); pressTimer=null; } };
+    }
+    grid.appendChild(div);
+    drawPreview(b,cv,locked);
+  });
 }
 
-function die() {
-    isOver = true;
-    saveScore(nameInput.value, score);
-    document.getElementById('last-score').innerText = nameInput.value + ": " + score;
-    renderLB();
-    document.getElementById('game-over').style.display = 'flex';
+function drawPreview(b,cv,locked){
+  const c=cv.getContext('2d');
+  c.clearRect(0,0,54,54);
+  c.save();
+  if(locked) c.filter='blur(3px) brightness(0.3)';
+  c.translate(27,27);
+  c.fillStyle=b.wing; c.beginPath(); c.moveTo(-14,0); c.quadraticCurveTo(0,-20,14,0); c.fill();
+  c.fillStyle=b.body; c.beginPath(); c.ellipse(0,0,20,8,0,0,Math.PI*2); c.fill();
+  c.fillStyle=b.head; c.beginPath(); c.arc(16,-4,9,0,Math.PI*2); c.fill();
+  c.fillStyle=b.beak; c.beginPath(); c.moveTo(22,-4); c.lineTo(32,-1); c.lineTo(22,2); c.fill();
+  c.fillStyle=b.eye;  c.beginPath(); c.arc(19,-5,2.5,0,Math.PI*2); c.fill();
+  c.fillStyle='#fff'; c.beginPath(); c.arc(20,-5.5,1,0,Math.PI*2); c.fill();
+  c.fillStyle=b.wing;
+  c.beginPath(); c.moveTo(-20,0); c.lineTo(-30,-5); c.lineTo(-24,2); c.fill();
+  c.beginPath(); c.moveTo(-20,2); c.lineTo(-28,8);  c.lineTo(-23,4); c.fill();
+  if(b.aura){
+    c.shadowBlur=12; c.shadowColor=b.aura;
+    c.strokeStyle=b.aura; c.lineWidth=1.5;
+    c.beginPath(); c.ellipse(0,0,21,9,0,0,Math.PI*2); c.stroke();
+    c.shadowBlur=0;
+  }
+  c.restore(); // filter сбрасывается вместе с save/restore
 }
 
-function restart() {
-    document.getElementById('game-over').style.display = 'none';
-    isOver = false; gameStarted = false; score = 0; scoreUI.innerText = "0";
-    initGame();
-    selectBird(birdBody, birdHead);
+
+
+// ══════════════════════════════════════════
+// БОНУСЫ
+// type: 'shield' | 'ghost' | 'gun' | 'slow'
+// ══════════════════════════════════════════
+const BONUS_DEFS = {
+  shield: { icon:'🛡', col:'#3498db', label:'ЩИТ',       dur:600 },
+  ghost:  { icon:'👻', col:'#9b59b6', label:'ПРИЗРАК',    dur:600 },
+  gun:    { icon:'💥', col:'#e74c3c', label:'ПУШКА',      dur:600 },
+  slow:   { icon:'⏳', col:'#2ecc71', label:'МЕДЛЕННО',   dur:600 },
+};
+const BONUS_TYPES = Object.keys(BONUS_DEFS);
+
+function spawnBonus(){
+  const type = BONUS_TYPES[Math.floor(Math.random()*BONUS_TYPES.length)];
+  bonuses.push({
+    x: W + 20,
+    y: H*0.15 + Math.random()*H*0.7,
+    type,
+    r: Math.min(W,H)*0.064,
+    pulse: Math.random()*Math.PI*2,
+    life: 1,
+  });
 }
 
-function saveScore(name, s) {
-    let sc = JSON.parse(localStorage.getItem('bird_storm_v4') || "[]");
-    sc.push({name, s});
-    sc.sort((a,b)=>b.s-a.s);
-    localStorage.setItem('bird_storm_v4', JSON.stringify(sc.slice(0, 5)));
+function updateBonuses(){
+  const spd = getDifficulty().spd;
+  const br  = Math.min(W,H)/520*9;
+
+  for(let i=bonuses.length-1; i>=0; i--){
+    const bo = bonuses[i];
+    bo.x -= spd * 0.7 * DT;
+    bo.pulse += 0.08;
+    // Подобрать
+    const dx = bird.x - bo.x, dy = bird.y - bo.y;
+    if(Math.sqrt(dx*dx+dy*dy) < bo.r + br){
+      collectBonus(bo.type);
+      bonuses.splice(i,1);
+      continue;
+    }
+    if(bo.x < -60) bonuses.splice(i,1);
+  }
 }
 
-function renderLB() {
-    let sc = JSON.parse(localStorage.getItem('bird_storm_v4') || "[]");
-    let html = `<b>ТОП ЛЕТЧИКОВ:</b>` + sc.map((item, i) => `
-        <div class="lb-row"><span>${i+1}. ${item.name}</span> <b>${item.s}</b></div>
-    `).join('');
-    document.getElementById('main-lb').innerHTML = html;
-    document.getElementById('death-lb').innerHTML = html;
+function collectBonus(type){
+  const def = BONUS_DEFS[type];
+  // Суммируем с текущим остатком (не обнуляем другие бонусы!)
+  if(type==='shield') activeShield = Math.min(1200, activeShield + def.dur);
+  if(type==='ghost')  activeGhost  = Math.min(1200, activeGhost  + def.dur);
+  if(type==='gun')    activeGun    = Math.min(1200, activeGun    + def.dur);
+  if(type==='slow')   activeSlow   = Math.min(1200, activeSlow   + def.dur);
+  sessionBonusCount++;
+  // Частицы подбора
+  const def2 = BONUS_DEFS[type];
+  for(let i=0;i<12;i++) particles.push({
+    x:bird.x, y:bird.y,
+    vx:(Math.random()-.5)*7, vy:(Math.random()-.5)*7,
+    r:3+Math.random()*5, col:def2.col, life:1
+  });
 }
 
-function loop() {
-    // Фон дня и ночи
-    let dayCol = [30, 101, 192]; // Голубой
-    let nightCol = [10, 15, 30];  // Темно-синий
-    let r = Math.round(nightCol[0] + (dayCol[0] - nightCol[0]) * cycle);
-    let g = Math.round(nightCol[1] + (dayCol[1] - nightCol[1]) * cycle);
-    let b = Math.round(nightCol[2] + (dayCol[2] - nightCol[2]) * cycle);
-    
-    ctx.fillStyle = `rgb(${r},${g},${b})`;
-    if(lightning > 0) ctx.fillStyle = '#fff'; // Вспышка молнии
-    ctx.fillRect(0,0,w,h);
+function spawnCoin(x, y){
+  coins.push({ x: x||W+10, y, pulse:Math.random()*Math.PI*2, r:Math.min(W,H)*0.048 });
+}
 
-    // Звезды (видны только ночью)
-    ctx.fillStyle = `rgba(255,255,255,${1 - cycle})`;
-    stars.forEach(s => {
-        ctx.beginPath(); ctx.arc(s.x, s.y, s.s * 2, 0, Math.PI*2); ctx.fill();
-    });
+function updateCoins(){
+  const spd = getDifficulty().spd;
+  const br  = Math.min(W,H)/520*9 * BIRDS[birdIdx].hitM;
+  for(let i=coins.length-1;i>=0;i--){
+    const co=coins[i];
+    co.x -= spd * DT;
+    co.pulse += 0.1;
+    const dx=bird.x-co.x, dy=bird.y-co.y;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const magnet=getBirdCoinRadius(BIRDS[birdIdx].id);
+    if(magnet>0 && dist < magnet){ co.x+=dx*0.12; co.y+=dy*0.12; }
+    if(dist < co.r + br){
+      sessionCoins++;
+      addCoins(1);
+      // Частицы
+      for(let j=0;j<6;j++) particles.push({
+        x:co.x,y:co.y,
+        vx:(Math.random()-.5)*5,vy:-Math.random()*4-1,
+        r:2+Math.random()*3, col:'#f1c40f', life:1
+      });
+      coins.splice(i,1); continue;
+    }
+    if(co.x < -40) coins.splice(i,1);
+  }
+}
 
-    // Облака
-    ctx.fillStyle = `rgba(255,255,255,${0.1 * cycle + 0.02})`;
-    clouds.forEach(c => {
-        c.x -= SPEED * 0.2 * c.s;
-        if(c.x < -150) c.x = w + 150;
-        ctx.beginPath(); ctx.arc(c.x, c.y, 60 * c.s, 0, Math.PI*2); ctx.fill();
-    });
+function drawCoins(){
+  coins.forEach(co=>{
+    const r = co.r * (1 + Math.sin(co.pulse)*0.15);
+    CX.save();
+    CX.shadowBlur=14; CX.shadowColor='#f1c40f';
+    CX.fillStyle='#f1c40f'; CX.globalAlpha=0.9;
+    CX.beginPath(); CX.arc(co.x,co.y,r,0,Math.PI*2); CX.fill();
+    CX.fillStyle='#e67e22'; CX.globalAlpha=0.7;
+    CX.beginPath(); CX.arc(co.x,co.y,r*0.6,0,Math.PI*2); CX.fill();
+    CX.shadowBlur=0; CX.globalAlpha=1;
+    // Знак монеты
+    CX.fillStyle='#fff';
+    CX.font='bold '+Math.round(r*1.1)+'px Arial';
+    CX.textAlign='center'; CX.textBaseline='middle';
+    CX.fillText('$', co.x, co.y);
+    CX.textAlign='left'; CX.textBaseline='alphabetic';
+    CX.restore();
+  });
+}
 
-    // Скалы
-    pipes.forEach(p => {
-        // Ночью скалы подсвечиваются неоном
-        ctx.fillStyle = cycle < 0.3 ? '#1e293b' : '#0f172a';
-        ctx.strokeStyle = cycle < 0.3 ? '#3498db' : 'transparent';
-        ctx.lineWidth = 2;
-        ctx.fillRect(p.x, p.type === 'top' ? 0 : h - p.h, p.w, p.h);
-        if(cycle < 0.3) ctx.strokeRect(p.x, p.type === 'top' ? 0 : h - p.h, p.w, p.h);
-        
-        ctx.fillStyle = cycle < 0.3 ? '#3498db' : '#f8fafc';
-        ctx.fillRect(p.x, p.type === 'top' ? p.h - 5 : h - p.h, p.w, 5);
-    });
+function drawCoinHud(){
+  if(STATE!=='playing'&&STATE!=='over') return;
+  const fs  = Math.min(W,H)*0.026;
+  const pad = fs*0.6;
+  const total = getTotalCoins();
+  const text  = '+'+sessionCoins+'  💰'+total;
+  CX.save();
+  CX.font='700 '+fs+'px Arial';
+  CX.textAlign='center'; CX.textBaseline='middle';
+  const tw = CX.measureText(text).width;
+  const pw = tw + pad*3;
+  const ph = fs*1.5;
+  const px = W/2 - pw/2;
+  const py = H - ph - fs*3.5; // нижний центр, выше чтобы не перекрывать задания
 
+  // Пилюля-фон с градиентом
+  const gr = CX.createLinearGradient(px,py,px+pw,py+ph);
+  gr.addColorStop(0,'rgba(20,10,0,.75)');
+  gr.addColorStop(1,'rgba(40,25,0,.75)');
+  CX.fillStyle=gr;
+  // Скруглённый прямоугольник
+  const rd=ph/2;
+  CX.beginPath();
+  CX.moveTo(px+rd,py);
+  CX.lineTo(px+pw-rd,py);
+  CX.quadraticCurveTo(px+pw,py,px+pw,py+rd);
+  CX.lineTo(px+pw,py+ph-rd);
+  CX.quadraticCurveTo(px+pw,py+ph,px+pw-rd,py+ph);
+  CX.lineTo(px+rd,py+ph);
+  CX.quadraticCurveTo(px,py+ph,px,py+ph-rd);
+  CX.lineTo(px,py+rd);
+  CX.quadraticCurveTo(px,py,px+rd,py);
+  CX.closePath();
+  CX.fill();
+
+  // Обводка золотая
+  CX.strokeStyle='rgba(241,196,15,.35)'; CX.lineWidth=1.5;
+  CX.stroke();
+
+  // Текст
+  CX.shadowBlur=8; CX.shadowColor='rgba(241,196,15,.6)';
+  CX.fillStyle='#f1c40f';
+  CX.fillText(text, W/2, py+ph/2);
+  CX.shadowBlur=0;
+  CX.restore();
+}
+
+function drawBonuses(){
+  bonuses.forEach(bo=>{
+    const def = BONUS_DEFS[bo.type];
+    const pulse = 1 + Math.sin(bo.pulse)*0.12;
+    const r = bo.r * pulse;
+    // Свечение
+    CX.save();
+    CX.shadowBlur=20; CX.shadowColor=def.col;
+    // Круг фона
+    CX.globalAlpha=0.35;
+    CX.fillStyle=def.col;
+    CX.beginPath(); CX.arc(bo.x,bo.y,r,0,Math.PI*2); CX.fill();
+    CX.globalAlpha=0.7;
+    CX.strokeStyle=def.col; CX.lineWidth=2;
+    CX.beginPath(); CX.arc(bo.x,bo.y,r,0,Math.PI*2); CX.stroke();
+    CX.shadowBlur=0;
+    // Иконка
+    CX.globalAlpha=1;
+    CX.font='bold '+Math.round(r*1.1)+'px Arial';
+    CX.textAlign='center'; CX.textBaseline='middle';
+    CX.fillText(def.icon, bo.x, bo.y);
+    CX.textAlign='left'; CX.textBaseline='alphabetic';
+    CX.restore();
+  });
+}
+
+function drawPhoenixCharges(){
+  if(STATE!=='playing'&&STATE!=='over') return;
+  if(BIRDS[birdIdx].id !== 'phoenix') return;
+  const maxC = getSkillLevel('phoenix','explode');
+  if(maxC === 0) return;
+  const r = Math.min(W,H)*0.022;
+  const gap = r*2.6;
+  const totalW = maxC*gap - (gap-r*2);
+  let sx = W/2 - totalW/2 + r;
+  const sy = Math.min(W,H)*0.14;
+  for(let i=0;i<maxC;i++){
+    const filled = i < phoenixCharges;
+    CX.save();
+    if(filled){
+      CX.shadowBlur=18; CX.shadowColor='#ff6b35';
+      CX.fillStyle='#f39c12';
+    } else {
+      CX.globalAlpha=0.25;
+      CX.fillStyle='#7f3a1a';
+    }
+    CX.beginPath(); CX.arc(sx+i*gap, sy, r, 0, Math.PI*2); CX.fill();
+    if(filled){
+      // Внутренний блик
+      CX.shadowBlur=0;
+      CX.fillStyle='rgba(255,220,100,.6)';
+      CX.beginPath(); CX.arc(sx+i*gap-r*0.3, sy-r*0.3, r*0.4, 0, Math.PI*2); CX.fill();
+    }
+    CX.shadowBlur=0; CX.globalAlpha=1;
+    CX.restore();
+  }
+  // Подпись
+  CX.save();
+  CX.font='600 '+Math.min(W,H)*0.018+'px Arial';
+  CX.textAlign='center'; CX.textBaseline='top';
+  CX.fillStyle='rgba(255,150,50,.7)';
+  CX.fillText('🔥 ЗАРЯДЫ', W/2, sy+r+4);
+  CX.textAlign='left'; CX.restore();
+}
+
+function drawActiveBonuses(){
+  // Полоски активных бонусов под HUD
+  const fs=Math.min(W,H)*.024;
+  let yi=0;
+  const drawBar=(type,remain,total)=>{
+    if(remain<=0) return;
+    const def=BONUS_DEFS[type];
+    const bw=Math.min(W*.28,170), bh=fs*.9;
+    const x=W-bw-10, y=fs*4.5+yi*(fs*1.8);
+    CX.save();
+    // Фон
+    CX.fillStyle='rgba(0,0,0,.5)';
+    CX.fillRect(x,y,bw,bh);
+    // Прогресс
+    CX.fillStyle=def.col;
+    CX.globalAlpha=0.8;
+    CX.fillRect(x,y,bw*(remain/total),bh);
+    CX.globalAlpha=1;
+    // Иконка + текст
+    CX.font='700 '+fs*.85+'px Arial';
+    CX.textBaseline='middle'; CX.fillStyle='#fff';
+    CX.shadowBlur=4; CX.shadowColor='rgba(0,0,0,.8)';
+    CX.fillText(def.icon+' '+def.label, x+4, y+bh/2);
+    CX.shadowBlur=0;
+    CX.restore();
+    yi++;
+  };
+  drawBar('shield', activeShield, BONUS_DEFS.shield.dur);
+  drawBar('ghost',  activeGhost,  BONUS_DEFS.ghost.dur);
+  drawBar('gun',    activeGun,    BONUS_DEFS.gun.dur);
+  drawBar('slow',   activeSlow,   BONUS_DEFS.slow.dur);
+}
+
+// Разблокировка птицы — баннер снизу
+function drawUnlockBanner(){
+  if(unlockFlash<=0) return;
+  unlockFlash--;
+  const alpha=Math.min(1,unlockFlash/40)*Math.min(1,(unlockFlash>140?1:(unlockFlash/40)));
+  const b=BIRDS[unlockFlashBird];
+  const fs=Math.min(W,H)*.038;
+  const text='🎉 РАЗБЛОКИРОВАНО: '+b.name+'!';
+  CX.save();
+  CX.globalAlpha=alpha;
+  CX.fillStyle='rgba(0,0,0,.7)';
+  CX.fillRect(0, H-fs*2.8, W, fs*2.8);
+  CX.strokeStyle=b.aura||'#f1c40f'; CX.lineWidth=2;
+  CX.strokeRect(0, H-fs*2.8, W, fs*2.8);
+  CX.font='700 '+fs+'px Arial';
+  CX.textAlign='center'; CX.textBaseline='middle';
+  CX.fillStyle=b.aura||'#f1c40f';
+  CX.shadowBlur=16; CX.shadowColor=b.aura||'#f1c40f';
+  CX.fillText(text, W/2, H-fs*1.3);
+  CX.shadowBlur=0;
+  CX.textAlign='left'; CX.textBaseline='alphabetic';
+  CX.restore();
+}
+
+// drawLevelHud удалён — уровни убраны
+
+// ══════════════════════════════════════════
+// ГЛАВНЫЙ ЦИКЛ
+// ══════════════════════════════════════════
+let _lastT = 0;
+let DT = 1; // множитель дельта-времени (1 = ровно 60fps)
+
+function loop(ts){
+  // Delta-time: нормируем к 60fps
+  // DT=1 при 60fps, DT=2 при 30fps — движение одинаковое
+  if(_lastT > 0){
+    const raw = ts - _lastT;
+    DT = Math.min(2.5, raw / 16.667); // ограничиваем чтобы не прыгать при tab switch
+  }
+  _lastT = ts;
+
+  cycleDayNight=(cycleDayNight+.00035)%1;
+  CX.clearRect(0,0,W,H);
+
+  // Тряска экрана
+  CX.save();
+  if(shakeDur>0){
+    const sx=(Math.random()-.5)*shakeAmp*2;
+    const sy=(Math.random()-.5)*shakeAmp*2;
+    CX.translate(sx,sy);
+    shakeAmp=Math.max(0,shakeAmp*.88);
+  }
+
+  // Фон рисуется всегда (красиво за меню тоже)
+  drawSky();
+  drawStars();
+  drawCelestial();
+  drawMountains();
+  drawBiomeForeground();
+  drawPalms();
+  drawAnimals();
+  drawClouds();
+
+  // Погода
+  if(STATE==='playing') updateWeather();
+  drawWeather();
+  // Трубы — только в игре и после смерти
+  if(STATE==='playing'||STATE==='over') drawPipes();
+
+  // Птица + частицы — всегда кроме меню
+  if(STATE!=='menu'){
+    if(STATE==='countdown'||STATE==='ready') updateIdle();
+    if(STATE==='playing') updateGame();
     drawBird();
-    update();
-    requestAnimationFrame(loop);
+    drawCoins();
+    drawBonuses();
+    drawParticles();
+    drawActiveBonuses();
+    drawPhoenixCharges();
+    drawCoinHud();
+    drawDailyHud();
+    drawUnlockBanner();
+    // Отсчёт/tap — рисуем НА canvas поверх всего
+    drawOverlayCanvas();
+  }
+
+  CX.restore(); // конец тряски
+  requestAnimationFrame(loop);
 }
 
-canvas.addEventListener('touchstart', (e) => { 
-    if(gameStarted && !isOver) bird.v = JUMP; 
-    e.preventDefault();
-}, {passive: false});
-
-window.onkeydown = (e) => { if(e.code === 'Space' && gameStarted && !isOver) bird.v = JUMP; };
-
-renderLB();
-loop();
+// ══════════════════════════════════════════
+// ЗАПУСК
+// ══════════════════════════════════════════
+resize();
+buildSelector();
+initWorld();
+setDiff(2); // начальный уровень — средний
+loop(); // ← запускаем цикл сразу
 </script>
 </body>
 </html>
-
-
