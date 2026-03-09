@@ -377,15 +377,17 @@ let GRAV, JUMP, SPEED, GAP, PIPE_INT;
 function recalcPhysics(){
   const portrait = H > W;
   const speedMult = [1.7, 2.2, 2.9, 3.8, 5.2][diffLevel-1];
-  // В портретном режиме трубы относительно уже, скорость чуть меньше
-  const orientMult = portrait ? 0.75 : 1.0;
-  SPEED    = W * 0.0055 * speedMult * orientMult;
-  GRAV     = H * (portrait ? 0.00032 : 0.00042);
-  JUMP     = H * (portrait ? -0.009  : -0.011);
-  // Зазор: в portrait H большой, поэтому берём % от min(W,H)
+  // Скорость одинаковая в обоих режимах — без orientMult
+  SPEED    = W * 0.0055 * speedMult;
+  GRAV     = H * (portrait ? 0.00028 : 0.00042);
+  JUMP     = H * (portrait ? -0.008  : -0.011);
+  // Зазор от короткой стороны экрана
   const ref = Math.min(W, H);
-  GAP      = ref * (portrait ? 0.55 : 0.44) * (1 - (diffLevel-1)*0.03);
-  PIPE_INT = Math.round(380 - (diffLevel-1)*30);
+  GAP      = ref * 0.46 * (1 - (diffLevel-1)*0.03);
+  // PIPE_DIST: расстояние между трубами в пикселях (не кадрах!)
+  // ~1.8 ширины экрана между трубами на старте
+  // Интервал в кадрах = расстояние/скорость, чтобы трубы были на одинаковом расстоянии
+  PIPE_INT = Math.round((W * 1.6) / (SPEED * (1 + 0.5)));  // ~1.6 ширины экрана между трубами
 }
 
 // ══════════════════════════════════════════
@@ -398,7 +400,7 @@ let playerName = 'ИГРОК';
 let diffLevel = 2; // 1-5, по умолчанию средний
 
 let bird, pipes, trails, particles;
-let score, frame, combo, comboTimer;
+let score, frame, combo, comboTimer, nextPipeFrame;
 let cycleDayNight = 0.55, lightFlash = 0;
 let stars, clouds, mountains;
 
@@ -450,7 +452,7 @@ function initWorld(){
   recalcPhysics();
   bird = {x:W*0.22, y:H/2, v:0, wing:0};
   pipes=[];trails=[];particles=[];
-  score=0; frame=0; combo=0; comboTimer=0; level=1; lastLevelScore=0;
+  score=0; frame=0; combo=0; comboTimer=0; level=1; lastLevelScore=0; nextPipeFrame=60;
   biome=0; prevBiome=0; biomeAlpha=1; biomeAnimals=[];
   initWeather();
   spawnAnimals();
@@ -610,7 +612,7 @@ function getDifficulty(){
   return {
     spd:      SPEED * (1 + t * 1.1) * slowMult,
     gap:      GAP   * (1 - t * 0.52),
-    interval: Math.round(PIPE_INT * Math.max(0.5, 1 - t * 0.45)),
+    interval: Math.round(PIPE_INT * Math.max(0.45, 1 - t * 0.45)),
     pw:       Math.max(55, W * 0.08 * (1 + t * 0.3)),
   };
 }
@@ -626,13 +628,16 @@ function updateGame(){
 
   const diff = getDifficulty();
 
-  // Трубы — первая через interval кадров после старта
-  if(frame > 0 && frame % diff.interval === 0){
-    const minH = H*.1;
-    const maxH = H - diff.gap - H*.1;
+  // Спавн труб по таймеру кадров с рандомным джиттером ±25%
+  if(frame >= nextPipeFrame){
+    const minH = H * 0.08;
+    const maxH = H - diff.gap - H * 0.08;
     const th = minH + Math.random() * Math.max(0, maxH - minH);
-    pipes.push({x:W+10, w:diff.pw, h:th,             top:true,  passed:false});
-    pipes.push({x:W+10, w:diff.pw, h:H-th-diff.gap,  top:false});
+    pipes.push({x:W + 10, w:diff.pw, h:th,            top:true,  passed:false});
+    pipes.push({x:W + 10, w:diff.pw, h:H-th-diff.gap, top:false});
+    // Следующая труба через interval ± 25% рандома
+    const jitter = diff.interval * (0.75 + Math.random()*0.5);
+    nextPipeFrame = frame + Math.round(jitter);
   }
 
   if(comboTimer>0) comboTimer-=DT;
@@ -1216,20 +1221,20 @@ function updateBiome(){
 function spawnAnimals(){
   biomeAnimals = [];
   if(biome===0){ // горы — орлы, козлы
-    for(let i=0;i<3;i++) biomeAnimals.push({type:'eagle_bg',x:W+Math.random()*W*2,y:H*0.2+Math.random()*H*0.25,vx:-(0.4+Math.random()*0.5),phase:Math.random()*Math.PI*2,flip:false});
-    for(let i=0;i<2;i++) biomeAnimals.push({type:'goat',x:W+Math.random()*W*1.5,y:H*0.55+Math.random()*H*0.1,vx:-(0.2+Math.random()*0.3),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'eagle_bg',x:W+Math.random()*W*2,y:H*0.2+Math.random()*H*0.25,vx:-(SPEED*(0.15+Math.random()*0.15)),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'goat',x:W+Math.random()*W*1.5,y:H*0.82+Math.random()*H*0.06,vx:-(SPEED*(0.08+Math.random()*0.08)),phase:Math.random()*Math.PI*2,flip:false});
   } else if(biome===1){ // пустыня — верблюды, скорпионы, стервятники
-    for(let i=0;i<2;i++) biomeAnimals.push({type:'camel',x:W+Math.random()*W*2,y:H*0.72+Math.random()*H*0.05,vx:-(0.15+Math.random()*0.2),phase:Math.random()*Math.PI*2,flip:false});
-    for(let i=0;i<3;i++) biomeAnimals.push({type:'vulture',x:W+Math.random()*W*2,y:H*0.15+Math.random()*H*0.2,vx:-(0.3+Math.random()*0.4),phase:Math.random()*Math.PI*2,flip:false});
-    for(let i=0;i<3;i++) biomeAnimals.push({type:'scorpion',x:W+Math.random()*W*2,y:H*0.78+Math.random()*H*0.04,vx:-(0.1+Math.random()*0.15),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'camel',x:W+Math.random()*W*2,y:H*0.84+Math.random()*H*0.04,vx:-(SPEED*(0.06+Math.random()*0.06)),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'vulture',x:W+Math.random()*W*2,y:H*0.12+Math.random()*H*0.18,vx:-(SPEED*(0.12+Math.random()*0.12)),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'scorpion',x:W+Math.random()*W*2,y:H*0.86+Math.random()*H*0.03,vx:-(SPEED*(0.05+Math.random()*0.05)),phase:Math.random()*Math.PI*2,flip:false});
   } else if(biome===2){ // море — акулы, киты, дельфины
-    for(let i=0;i<2;i++) biomeAnimals.push({type:'whale',x:W+Math.random()*W*2,y:H*0.65+Math.random()*H*0.1,vx:-(0.2+Math.random()*0.25),phase:Math.random()*Math.PI*2,flip:false});
-    for(let i=0;i<3;i++) biomeAnimals.push({type:'shark',x:W+Math.random()*W*2,y:H*0.6+Math.random()*H*0.15,vx:-(0.35+Math.random()*0.4),phase:Math.random()*Math.PI*2,flip:false});
-    for(let i=0;i<3;i++) biomeAnimals.push({type:'dolphin',x:W+Math.random()*W*2,y:H*0.58+Math.random()*H*0.12,vx:-(0.4+Math.random()*0.5),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'whale',x:W+Math.random()*W*2,y:H*0.72+Math.random()*H*0.08,vx:-(SPEED*(0.08+Math.random()*0.08)),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'shark',x:W+Math.random()*W*2,y:H*0.65+Math.random()*H*0.1,vx:-(SPEED*(0.14+Math.random()*0.12)),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<3;i++) biomeAnimals.push({type:'dolphin',x:W+Math.random()*W*2,y:H*0.6+Math.random()*H*0.1,vx:-(SPEED*(0.16+Math.random()*0.14)),phase:Math.random()*Math.PI*2,flip:false});
   } else { // арктика — белые медведи, пингвины, тюлени
-    for(let i=0;i<2;i++) biomeAnimals.push({type:'polarbear',x:W+Math.random()*W*2,y:H*0.72+Math.random()*H*0.05,vx:-(0.18+Math.random()*0.2),phase:Math.random()*Math.PI*2,flip:false});
-    for(let i=0;i<4;i++) biomeAnimals.push({type:'penguin',x:W+Math.random()*W*2,y:H*0.74+Math.random()*H*0.04,vx:-(0.12+Math.random()*0.15),phase:Math.random()*Math.PI*2,flip:false});
-    for(let i=0;i<2;i++) biomeAnimals.push({type:'seal',x:W+Math.random()*W*2,y:H*0.73+Math.random()*H*0.05,vx:-(0.2+Math.random()*0.2),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'polarbear',x:W+Math.random()*W*2,y:H*0.83+Math.random()*H*0.04,vx:-(SPEED*(0.07+Math.random()*0.07)),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<4;i++) biomeAnimals.push({type:'penguin',x:W+Math.random()*W*2,y:H*0.84+Math.random()*H*0.03,vx:-(SPEED*(0.05+Math.random()*0.05)),phase:Math.random()*Math.PI*2,flip:false});
+    for(let i=0;i<2;i++) biomeAnimals.push({type:'seal',x:W+Math.random()*W*2,y:H*0.84+Math.random()*H*0.04,vx:-(SPEED*(0.08+Math.random()*0.08)),phase:Math.random()*Math.PI*2,flip:false});
   }
 }
 
@@ -1243,10 +1248,10 @@ function updateAnimals(){
 
 // Рисуем животное по типу
 function drawAnimal(a){
-  const s = Math.min(W,H)/360;
+  const s = Math.min(Math.min(W,H)/360, 1.4); // ограничиваем размер
   CX.save();
   CX.translate(a.x, a.y);
-  if(a.vx > 0) CX.scale(-1,1);
+  CX.scale(-1,1); // животные всегда летят влево — зеркалим
   CX.globalAlpha = biomeAlpha * 0.88;
 
   const t = a.phase;
