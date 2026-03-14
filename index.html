@@ -360,8 +360,7 @@ function resize(){
 }
 window.addEventListener('resize', resize);
 window.addEventListener('orientationchange', ()=>setTimeout(resize,300));
-if(window.visualViewport) window.visualViewport.addEventListener('resize', resize);
-if(window.visualViewport) window.visualViewport.addEventListener('scroll', resize);
+// visualViewport scroll убран — вызывал resize() при каждом тапе → рывок труб
 // Telegram WebApp API — слушаем изменение viewport
 if(window.Telegram && window.Telegram.WebApp){
   window.Telegram.WebApp.expand();
