@@ -561,11 +561,10 @@ function onTap(e){
     // Первый тап — старт игры
     STATE = 'playing';
     frame = 0;
-    // Заряды феникса — инициализируем здесь когда birdIdx точно известен
     phoenixCharges = getSkillLevel(BIRDS[birdIdx].id, 'explode');
     showEl('hud');
     document.getElementById('speedbar').style.display = 'block';
-    doFlap();
+    _flapPending = true; // первый флап тоже через флаг
     return;
   }
 
@@ -576,13 +575,13 @@ function onTap(e){
 
 let _lastFlapTime = 0;
 let _lastOrientCheck = 0;
+let _flapPending = false; // флаг — применяется в game loop, не в event handler
+
 function doFlap(){
   const now = Date.now();
-  if(now - _lastFlapTime < 120) return; // защита от ghost touch на мобиле
+  if(now - _lastFlapTime < 120) return;
   _lastFlapTime = now;
-  const bdef = BIRDS[birdIdx];
-  bird.v = JUMP * getBirdJumpM(bdef.id);
-  // Убраны частицы при флапе — они вызывали микрофриз на мобиле
+  _flapPending = true; // только ставим флаг, физику не трогаем
 }
 
 // Слушаем ТОЛЬКО canvas — никаких других элементов поверх него во время игры
@@ -636,6 +635,11 @@ function getDifficulty(){
 // ══════════════════════════════════════════
 function updateGame(){
   const bdef = BIRDS[birdIdx];
+  // Применяем флап синхронно с game loop — нет дёргания
+  if(_flapPending){
+    _flapPending = false;
+    bird.v = JUMP * getBirdJumpM(bdef.id);
+  }
   bird.v += GRAV * getBirdGravM(bdef.id) * DT;
   bird.y += bird.v * DT;
   bird.wing += .15 * DT;
