@@ -9,7 +9,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
 html{width:100%;height:100%;background:#000}
 body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;font-family:'Segoe UI',Arial,sans-serif}
-canvas{display:block;position:fixed;top:0;left:0}
+canvas{display:block;position:fixed;top:0;left:0;touch-action:none}
 
 /* ── ПОВЕРНУТЬ ЭКРАН ── */
 #rotate{display:none;position:fixed;inset:0;z-index:99999;background:#05080f;
@@ -150,6 +150,10 @@ canvas{display:block;position:fixed;top:0;left:0}
 @keyframes upgFlash{0%{opacity:0;transform:scale(.8)}50%{opacity:1;transform:scale(1.05)}100%{opacity:0;transform:scale(1)}}
 .upg-flash{animation:upgFlash .5s ease-out forwards;position:absolute;inset:0;
   background:rgba(241,196,15,.15);border-radius:14px;pointer-events:none}
+.upg-sell-btn{margin-top:6px;padding:5px 10px;border:1px solid rgba(231,76,60,.4);border-radius:7px;
+  background:rgba(231,76,60,.08);color:rgba(231,76,60,.8);font-size:10px;font-weight:700;
+  letter-spacing:1px;cursor:pointer;transition:all .2s;display:inline-block}
+.upg-sell-btn:hover{background:rgba(231,76,60,.2);border-color:rgba(231,76,60,.8);color:#e74c3c}
 
 /* ── HUD ── */
 #hud{position:fixed;top:0;left:0;right:0;z-index:100;pointer-events:none;
@@ -542,7 +546,8 @@ function cdTick(){
 // Никаких HTML-оверлеев между пользователем и canvas в режиме countdown/ready/playing
 // ══════════════════════════════════════════
 function onTap(e){
-  if(e) e.preventDefault();
+  // e.preventDefault() убран — touch-action:none на body уже блокирует scroll
+  // passive:true listener ниже — нет блокировки рендера браузера
 
   if(STATE === 'countdown'){
     // Нажатие во время отсчёта — ускоряем, переходим сразу в ready
@@ -581,7 +586,7 @@ function doFlap(){
 }
 
 // Слушаем ТОЛЬКО canvas — никаких других элементов поверх него во время игры
-CV.addEventListener('touchstart', onTap, {passive:false});
+CV.addEventListener('touchstart', onTap, {passive:true}); // passive=true — нет фриза рендера
 // mousedown только если нет touch-поддержки (ПК)
 if(!('ontouchstart' in window)){
   CV.addEventListener('mousedown', onTap);
@@ -2498,6 +2503,15 @@ function renderUpgradeSkills(idx){
     if(!maxed){
       card.onclick = ()=> buyUpgrade(idx, di, card);
     }
+    // Кнопка продажи — если есть хоть один купленный уровень
+    if(lvl > 0){
+      const sellRefund = Math.floor(def.costs[lvl-1] * 0.5);
+      const sellBtn = document.createElement('div');
+      sellBtn.className = 'upg-sell-btn';
+      sellBtn.textContent = '🔻 ПРОДАТЬ ЗА ' + sellRefund + '💰';
+      sellBtn.onclick = (e)=>{ e.stopPropagation(); sellUpgrade(idx, di); };
+      card.appendChild(sellBtn);
+    }
     container.appendChild(card);
 
     // Анимируем полосу через небольшую задержку
@@ -2527,6 +2541,18 @@ function buyUpgrade(birdIdx2, defIdx, card){
   setTimeout(()=>flash.remove(),600);
 
   // Обновляем UI
+  document.getElementById('upg-coins').textContent = '💰 '+getTotalCoins();
+  renderUpgradeSkills(birdIdx2);
+}
+
+function sellUpgrade(birdIdx2, defIdx){
+  const b   = BIRDS[birdIdx2];
+  const def = UPGRADE_DEFS[b.id][defIdx];
+  const lvl = getSkillLevel(b.id, def.id);
+  if(lvl <= 0) return;
+  const refund = Math.floor(def.costs[lvl-1] * 0.5);
+  setSkillLevel(b.id, def.id, lvl-1);
+  addCoins(refund);
   document.getElementById('upg-coins').textContent = '💰 '+getTotalCoins();
   renderUpgradeSkills(birdIdx2);
 }
