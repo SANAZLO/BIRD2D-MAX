@@ -573,16 +573,11 @@ let _lastFlapTime = 0;
 let _lastOrientCheck = 0;
 function doFlap(){
   const now = Date.now();
-  if(now - _lastFlapTime < 80) return; // защита от двойного тапа touch+mouse
+  if(now - _lastFlapTime < 120) return; // защита от ghost touch на мобиле
   _lastFlapTime = now;
   const bdef = BIRDS[birdIdx];
   bird.v = JUMP * getBirdJumpM(bdef.id);
-  const b = BIRDS[birdIdx];
-  for(let i=0;i<5;i++) particles.push({
-    x:bird.x-12, y:bird.y+4,
-    vx:-Math.random()*2.5, vy:(Math.random()-.5)*3,
-    r:2+Math.random()*2, col:b.trail, life:1
-  });
+  // Убраны частицы при флапе — они вызывали микрофриз на мобиле
 }
 
 // Слушаем ТОЛЬКО canvas — никаких других элементов поверх него во время игры
@@ -604,6 +599,7 @@ function clickAgain(){
 function clickMenu(){
   hideEl('gameover');
   initWorld();
+  buildSelector(); // обновляем птиц (могли разблокироваться за игру)
   STATE = 'menu';
   showEl('menu');
 }
@@ -741,7 +737,8 @@ function updateGame(){
       if(unl < BIRDS.length && score > 0 && score % 50 === 0){
         setUnlocked(unl+1);
         unlockFlash = 180;
-        unlockFlashBird = unl; // unl = индекс только что открытой птицы (0-based)
+        unlockFlashBird = unl;
+        buildSelector(); // сразу обновляем меню
       }
       // Бонус навыка птицы: каждые 10 труб
       if(score > 0 && score % 30 === 0){
