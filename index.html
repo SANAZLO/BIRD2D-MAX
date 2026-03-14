@@ -12,11 +12,9 @@ body{width:100%;height:100%;overflow:hidden;background:#000;touch-action:none;fo
 canvas{display:block;position:fixed;top:0;left:0}
 
 /* ── ПОВЕРНУТЬ ЭКРАН ── */
-#rotate{display:none;position:fixed;inset:0;z-index:9999;background:#05080f;flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center;
+#rotate{display:none;position:fixed;inset:0;z-index:99999;background:#05080f;
   flex-direction:column;align-items:center;justify-content:center;gap:20px;text-align:center}
-#rotate-icon{font-size:72px;animation:rtilt 1.5s ease-in-out infinite alternate}
-@keyframes rtilt{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
-#rotate p{color:#f1c40f;font-size:20px;font-weight:700;letter-spacing:2px;padding:0 20px}
+#rotate.show{display:flex!important}
 #rotate-icon{font-size:72px;animation:rtilt 1.5s ease-in-out infinite alternate}
 @keyframes rtilt{from{transform:rotate(-30deg)}to{transform:rotate(30deg)}}
 #rotate p{color:#f1c40f;font-size:20px;font-weight:700;letter-spacing:2px;padding:0 20px}
@@ -367,9 +365,14 @@ if(window.Telegram && window.Telegram.WebApp){
 }
 
 function checkRotate(){
-  const mob = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-  document.getElementById('rotate').style.display =
-    (mob && window.innerHeight > window.innerWidth) ? 'flex' : 'none';
+  const el = document.getElementById('rotate');
+  const isPortrait = window.innerHeight > window.innerWidth;
+  // Показываем на ЛЮБОМ устройстве в portrait (включая Telegram)
+  if(isPortrait){
+    el.classList.add('show');
+  } else {
+    el.classList.remove('show');
+  }
 }
 
 // ══════════════════════════════════════════
@@ -567,6 +570,7 @@ function onTap(e){
 }
 
 let _lastFlapTime = 0;
+let _lastOrientCheck = 0;
 function doFlap(){
   const now = Date.now();
   if(now - _lastFlapTime < 80) return; // защита от двойного тапа touch+mouse
@@ -2962,6 +2966,8 @@ function loop(ts){
   _lastT = ts;
 
   cycleDayNight=(cycleDayNight+.00035)%1;
+  // Проверяем ориентацию каждые 60 кадров
+  if(Math.floor(Date.now()/1000) !== _lastOrientCheck){ _lastOrientCheck=Math.floor(Date.now()/1000); checkRotate(); }
   CX.clearRect(0,0,W,H);
 
   // Тряска экрана
